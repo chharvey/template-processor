@@ -1,6 +1,6 @@
 {
   "name": "template-processor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight class for generating markup from a template and some data.",
   "main": "index.js",
   "scripts": {
