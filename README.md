@@ -1,10 +1,12 @@
 # template-processor
 A lightweight class for generating markup from a template and some data.
 
+
 ## Install
 ```bash
 npm install template-processor
 ```
+
 
 ## Example
 
@@ -66,8 +68,8 @@ document.body.append(snippet_to_append)
 import {Processor} from 'template-processor'
 
 // get your own template & write your own instructions
-type DataType = { url: string, text: string }
-type OptsType = { uppercase?: boolean }
+type DataType = { url: string; text: string; }
+type OptsType = { uppercase?: boolean; }
 let template: HTMLTemplateElement = document.querySelector('template') !
 function instructions(frag: DocumentFragment, data: DataType, opts: OptsType): void {
 	frag.querySelector('a').href        = data.url
@@ -119,5 +121,44 @@ async function instructions(frag: DocumentFragment, data: DataType, opts: OptsTy
 }
 let my_processor: Processor<DataType, OptsType> = new ProcessorAsync(template, instructions)
 
-my_processor.process(data, opts).then((docfrag) => document.body.append(docfrag))
+my_processor.process(data, opts).then((docfrag: DocumentFragment) => document.body.append(docfrag))
+```
+
+
+## Why?
+
+The point is to have one template and one instruction, but tons of data.
+
+```js
+const dataset = [
+	{ "name": "twitter" , "url": "//twitter.com/god"    , "text": "Follow God on Twitter"        },
+	{ "name": "google"  , "url": "//plus.google.com/god", "text": "Follow God on Google+"        },
+	{ "name": "facebook", "url": "//facebook.com/god"   , "text": "Like God on Facebook"         },
+	{ "name": "linkedin", "url": "//linkedin.com/god"   , "text": "Connect with God on LinkedIn" },
+	{ "name": "youtube" , "url": "//youtube.com/god"    , "text": "Watch God on YouTube"         },
+	// even more and more
+]
+const document = createDocument`
+<html>
+<body>
+<h1>Social Media Links</h1>
+<ul class="c-LinkList">
+	<template>
+		<li class="c-LinkList__Item">
+			<a class="c-LinkList__Link" href="{{ url }}">
+				<i class="{{ name }}"></i>
+				<slot name="text">{{ text }}</slot>
+			</a>
+		</li>
+	</template>
+</ul>
+</body>
+</html>
+`
+let processor = new Processor(document.querySelector('ul > template'), (frag, data, opts) => {
+	frag.querySelector('a.c-LinkList__Link').href        = data.url
+	frag.querySelector('i'                 ).className   = `icon icon-${data.name}`
+	frag.querySelector('slot[name="text"]' ).textContent = data.text
+})
+document.querySelector('ul').append(...dataset.map((data) => processor.process(data)))
 ```
