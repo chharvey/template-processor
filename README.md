@@ -88,3 +88,36 @@ let snippet_to_append: DocumentFragment = my_processor.process({
 
 document.body.append(snippet_to_append)
 ```
+
+
+## Async Example
+
+Asynchronous processing is available.
+
+1. Import the `ProcessorAsync` class.
+2. The constructor’s `instructions` argument may be an async function returning a `Promise<void>`.
+3. The `ProcessorAsync#process` method is also async, returning a `Promise<DocumentFragment>`.
+
+### JavaScript
+```js
+const {ProcessorAsync} = require('template-processor')
+
+async function instructions(frag, data, opts) {
+	await doSomeAsyncStuff();
+}
+let my_processor = new ProcessorAsync(template, instructions)
+
+my_processor.process(data, opts).then((docfrag) => document.body.append(docfrag))
+```
+
+### TypeScript
+```ts
+import {ProcessorAsync} from 'template-processor'
+
+async function instructions(frag: DocumentFragment, data: DataType, opts: OptsType): Promise<void> {
+	await doSomeAsyncStuff();
+}
+let my_processor: Processor<DataType, OptsType> = new ProcessorAsync(template, instructions)
+
+my_processor.process(data, opts).then((docfrag) => document.body.append(docfrag))
+```
