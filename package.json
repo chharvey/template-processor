@@ -1,0 +1,31 @@
+{
+  "name": "template-processor",
+  "version": "1.0.0",
+  "description": "A lightweight class for generating markup from a template and some data.",
+  "main": "index.js",
+  "scripts": {
+    "build": "gulp build",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chharvey/template-processor.git"
+  },
+  "keywords": [
+    "html",
+    "template",
+    "dom"
+  ],
+  "author": "Chris Harvey <chrisharvey2pi@gmail.com> (https://chharvey.github.io/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chharvey/template-processor/issues"
+  },
+  "homepage": "https://github.com/chharvey/template-processor#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^5.0.0-alpha.3",
+    "typescript": "^3.0.3"
+  }
+}
