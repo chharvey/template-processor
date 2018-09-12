@@ -11,9 +11,9 @@
  *
  * @param   <T> the type of the `data` parameter
  * @param   <U> the type of the `options` object parameter
- * @param   frag the template content with which to render
- * @param   data the data to fill the template upon rendering
- * @param   options additional rendering options
+ * @param   frag the template content to process
+ * @param   data the data to fill the template when processing
+ * @param   options additional processing options
  */
 export interface ProcessingFunction<T, U extends object> extends Function {
 	(this: any, frag: DocumentFragment, data: T, opts: U): void;
