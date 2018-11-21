@@ -1,12 +1,10 @@
 {
 	"compilerOptions": {
-		"target"              : "ES2017",
-		"module"              : "commonjs",
-		"removeComments"      : true,
-		"strictNullChecks"    : true,
-		"strictFunctionTypes" : true,
-		"noImplicitAny"       : true,
-		"noImplicitThis"      : true,
-		"noEmitOnError"       : true
+		"target"            : "ES2017",
+		"module"            : "commonjs",
+		"strict"            : true,
+		"noImplicitReturns" : true,
+		"removeComments"    : true,
+		"noEmitOnError"     : true
 	}
 }
