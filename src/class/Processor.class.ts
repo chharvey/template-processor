@@ -24,9 +24,9 @@ export interface ProcessingFunction<T, U extends object> extends Function {
  * Asynchronous {@link Processor}.
  * @param   <T> the type of the `data` parameter
  * @param   <U> the type of the `options` object parameter
- * @param   frag the template content with which to render
+ * @param   frag the template content to process
  * @param   data the data to fill the template upon rendering
- * @param   options additional rendering options
+ * @param   options additional processing options
  */
 export interface ProcessingFunctionAsync<T, U extends object> extends Function {
 	(this: any, frag: DocumentFragment, data: T, opts: U): Promise<void>;
@@ -73,6 +73,9 @@ export default class Processor<T, U extends object> {
 	 * @returns the processed output
 	 */
 	process(data: T, options: U = ({} as U), this_arg: unknown = null): DocumentFragment {
+		if (this._INSTRUCTIONS_ASYNC !== null) {
+			console.warn('An asynchronous instruction is available; did you mean to call `processAsync()`?')
+		}
 		let frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
 		this._INSTRUCTIONS.call(this_arg, frag, data, options)
 		return frag
