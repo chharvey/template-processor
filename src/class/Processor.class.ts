@@ -16,8 +16,8 @@
  * @param   options additional processing options
  */
 export interface ProcessingFunction<T, U extends object> extends Function {
-	(this: any, frag: DocumentFragment, data: T, opts: U): void;
-	call(this_arg: any, frag: DocumentFragment, data: T, opts: U): void;
+	(this: any, frag: Document|DocumentFragment, data: T, opts: U): void;
+	call(this_arg: unknown, frag: Document|DocumentFragment, data: T, opts: U): void;
 }
 /**
  * Asynchronous {@link ProcessingFunction}.
@@ -28,8 +28,8 @@ export interface ProcessingFunction<T, U extends object> extends Function {
  * @param   options additional processing options
  */
 export interface ProcessingFunctionAsync<T, U extends object> extends Function {
-	(this: any, frag: DocumentFragment, data: T, opts: U): Promise<void>;
-	call(this_arg: any, frag: DocumentFragment, data: T, opts: U): Promise<void>;
+	(this: any, frag: Document|DocumentFragment, data: T, opts: U): Promise<void>;
+	call(this_arg: unknown, frag: Document|DocumentFragment, data: T, opts: U): Promise<void>;
 }
 
 
@@ -51,7 +51,7 @@ export default class Processor<T, U extends object> {
 	 * @param   this_arg     the `this` context, if any, in which the instructions is called
 	 * @returns the processed document fragment (modified)
 	 */
-	static process<V, W extends object>(frag: DocumentFragment, instructions: ProcessingFunction<V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): DocumentFragment {
+	static process<S extends Document|DocumentFragment, V, W extends object>(frag: S, instructions: ProcessingFunction<V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): S {
 		instructions.call(this_arg, frag, data, options)
 		return frag
 	}
@@ -66,7 +66,7 @@ export default class Processor<T, U extends object> {
 	 * @param   this_arg     the `this` context, if any, in which the instructions is called
 	 * @returns the processed document fragment (modified)
 	 */
-	static async processAsync<V, W extends object>(frag: DocumentFragment, instructions: ProcessingFunctionAsync<V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): Promise<DocumentFragment> {
+	static async processAsync<S extends Document|DocumentFragment, V, W extends object>(frag: S, instructions: ProcessingFunctionAsync<V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): Promise<S> {
 		await instructions.call(this_arg, frag, data, options)
 		return frag
 	}
