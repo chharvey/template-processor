@@ -1,7 +1,7 @@
 /**
  * A processing function specifies how to transform a template into markup.
  *
- * This function modifies a given document fragment, filling it in with given data.
+ * This function modifies a given document or document fragment, filling it in with given data.
  * Additionally it may use any rendering options passed.
  * It *should not* have a `this` context, and it *should not* have a return value.
  *
@@ -9,11 +9,11 @@
  * {@link Processor.process} or {@link Processor#process}.
  * Any return value of the function does nothing.
  *
- * @param   <T> the type of the `data` parameter
- * @param   <U> the type of the `options` object parameter
- * @param   frag the template content to process
- * @param   data the data to fill the template when processing
- * @param   options additional processing options
+ * @param   <T> the type of the data to fill when processing
+ * @param   <U> the type of the processing options object
+ * @param   frag the document or document fragment to process
+ * @param   data the data to fill the content when processing
+ * @param   opts additional processing options
  */
 export interface ProcessingFunction<T, U extends object> extends Function {
 	(this: any, frag: Document|DocumentFragment, data: T, opts: U): void;
@@ -21,10 +21,10 @@ export interface ProcessingFunction<T, U extends object> extends Function {
 }
 /**
  * Asynchronous {@link ProcessingFunction}.
- * @param   <T> the type of the `data` parameter
- * @param   <U> the type of the `options` object parameter
- * @param   frag the template content to process
- * @param   data the data to fill the template upon rendering
+ * @param   <T> the type of the data to fill when processing
+ * @param   <U> the type of the processing options object
+ * @param   frag the document or document fragment to process
+ * @param   data the data to fill the content upon rendering
  * @param   options additional processing options
  */
 export interface ProcessingFunctionAsync<T, U extends object> extends Function {
@@ -35,21 +35,24 @@ export interface ProcessingFunctionAsync<T, U extends object> extends Function {
 
 /**
  * A Processor stores processing operations for a template and a processing function.
+ * @param   <T> the type of the data to fill when processing
+ * @param   <U> the type of the processing options object
  */
 export default class Processor<T, U extends object> {
 	/**
-	 * Process a document fragment with some data, and return the same fragment, modified.
+	 * Process a document or document fragment with some data, and return the same content, modified.
 	 *
 	 * This method is equivalent to {@link Processor#process}, but useful if you have
-	 * a document fragment but no `<template>` element to which it belongs.
-	 * @param   <V>          the type of the data to fill
-	 * @param   <W>          the type of the `options` object
-	 * @param   frag         the document fragment to process
+	 * a whole document, or a document fragment but no `<template>` element to which it belongs.
+	 * @param   <S>          the content to process
+	 * @param   <V>          the type of the data to fill when processing
+	 * @param   <W>          the type of the processing options object
+	 * @param   frag         the document or document fragment to process
 	 * @param   instructions the processing function to use, taking `frag` as an argument
-	 * @param   data         the data to fill
+	 * @param   data         the data to fill the content when processing
 	 * @param   options      additional processing options
 	 * @param   this_arg     the `this` context, if any, in which the instructions is called
-	 * @returns the processed document fragment (modified)
+	 * @returns the processed content (modified)
 	 */
 	static process<S extends Document|DocumentFragment, V, W extends object>(frag: S, instructions: ProcessingFunction<V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): S {
 		instructions.call(this_arg, frag, data, options)
@@ -57,14 +60,15 @@ export default class Processor<T, U extends object> {
 	}
 	/**
 	 * Asynchronous {@link Processor.process}.
-	 * @param   <V>          the type of the data to fill
-	 * @param   <W>          the type of the `options` object
-	 * @param   frag         the document fragment to process
+	 * @param   <S>          the content to process
+	 * @param   <V>          the type of the data to fill when processing
+	 * @param   <W>          the type of the processing options object
+	 * @param   frag         the document or document fragment to process
 	 * @param   instructions the processing function to use, taking `frag` as an argument
-	 * @param   data         the data to fill
+	 * @param   data         the data to fill the content when processing
 	 * @param   options      additional processing options
 	 * @param   this_arg     the `this` context, if any, in which the instructions is called
-	 * @returns the processed document fragment (modified)
+	 * @returns the processed content (modified)
 	 */
 	static async processAsync<S extends Document|DocumentFragment, V, W extends object>(frag: S, instructions: ProcessingFunctionAsync<V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): Promise<S> {
 		await instructions.call(this_arg, frag, data, options)
@@ -81,7 +85,7 @@ export default class Processor<T, U extends object> {
 	 */
 	private readonly _INSTRUCTIONS: ProcessingFunction<T, U>;
 	/**
-	 * Asynchronous {@link Processor._INSTRUCTIONS}.
+	 * Asynchronous {@link Processor#_INSTRUCTIONS}.
 	 */
 	private readonly _INSTRUCTIONS_ASYNC: ProcessingFunctionAsync<T, U>|null;
 
@@ -99,9 +103,7 @@ export default class Processor<T, U extends object> {
 
 	/**
 	 * Process this component’s template with some data, and return the resulting fragment.
-	 * @param   <T>      the type of the data to fill
-	 * @param   <U>      the type of the `options` object
-	 * @param   data     the data to fill
+	 * @param   data     the data to fill the content when processing
 	 * @param   options  additional processing options
 	 * @param   this_arg the `this` context, if any, in which this object’s instructions is called
 	 * @returns the processed output
@@ -115,9 +117,7 @@ export default class Processor<T, U extends object> {
 	}
 	/**
 	 * Asynchronous {@link Processor#process}.
-	 * @param   <T>      the type of the data to fill
-	 * @param   <U>      the type of the `options` object
-	 * @param   data     the data to fill
+	 * @param   data     the data to fill the content when processing
 	 * @param   options  additional processing options
 	 * @param   this_arg the `this` context, if any, in which this object’s instructions is called
 	 * @returns the processed output
