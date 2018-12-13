@@ -9,27 +9,29 @@
  * {@link Processor.process} or {@link Processor#process}.
  * Any return value of the function does nothing.
  *
+ * @param   <S> the type of content to process
  * @param   <T> the type of the data to fill when processing
  * @param   <U> the type of the processing options object
  * @param   frag the document or document fragment to process
  * @param   data the data to fill the content when processing
  * @param   opts additional processing options
  */
-export interface ProcessingFunction<T, U extends object> extends Function {
-	(this: any, frag: Document|DocumentFragment, data: T, opts: U): void;
-	call(this_arg: unknown, frag: Document|DocumentFragment, data: T, opts: U): void;
+export interface ProcessingFunction<S extends Document|DocumentFragment, T, U extends object> extends Function {
+	(this: any, frag: S, data: T, opts: U): void;
+	call(this_arg: unknown, frag: S, data: T, opts: U): void;
 }
 /**
  * Asynchronous {@link ProcessingFunction}.
+ * @param   <S> the type of content to process
  * @param   <T> the type of the data to fill when processing
  * @param   <U> the type of the processing options object
  * @param   frag the document or document fragment to process
  * @param   data the data to fill the content upon rendering
  * @param   options additional processing options
  */
-export interface ProcessingFunctionAsync<T, U extends object> extends Function {
-	(this: any, frag: Document|DocumentFragment, data: T, opts: U): Promise<void>;
-	call(this_arg: unknown, frag: Document|DocumentFragment, data: T, opts: U): Promise<void>;
+export interface ProcessingFunctionAsync<S extends Document|DocumentFragment, T, U extends object> extends Function {
+	(this: any, frag: S, data: T, opts: U): Promise<void>;
+	call(this_arg: unknown, frag: S, data: T, opts: U): Promise<void>;
 }
 
 
@@ -44,7 +46,7 @@ export default class Processor<T, U extends object> {
 	 *
 	 * This method is equivalent to {@link Processor#process}, but useful if you have
 	 * a whole document, or a document fragment but no `<template>` element to which it belongs.
-	 * @param   <S>          the content to process
+	 * @param   <S>          the type of content to process
 	 * @param   <V>          the type of the data to fill when processing
 	 * @param   <W>          the type of the processing options object
 	 * @param   frag         the document or document fragment to process
@@ -54,13 +56,13 @@ export default class Processor<T, U extends object> {
 	 * @param   this_arg     the `this` context, if any, in which the instructions is called
 	 * @returns the processed content (modified)
 	 */
-	static process<S extends Document|DocumentFragment, V, W extends object>(frag: S, instructions: ProcessingFunction<V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): S {
+	static process<S extends Document|DocumentFragment, V, W extends object>(frag: S, instructions: ProcessingFunction<S, V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): S {
 		instructions.call(this_arg, frag, data, options)
 		return frag
 	}
 	/**
 	 * Asynchronous {@link Processor.process}.
-	 * @param   <S>          the content to process
+	 * @param   <S>          the type of content to process
 	 * @param   <V>          the type of the data to fill when processing
 	 * @param   <W>          the type of the processing options object
 	 * @param   frag         the document or document fragment to process
@@ -70,7 +72,7 @@ export default class Processor<T, U extends object> {
 	 * @param   this_arg     the `this` context, if any, in which the instructions is called
 	 * @returns the processed content (modified)
 	 */
-	static async processAsync<S extends Document|DocumentFragment, V, W extends object>(frag: S, instructions: ProcessingFunctionAsync<V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): Promise<S> {
+	static async processAsync<S extends Document|DocumentFragment, V, W extends object>(frag: S, instructions: ProcessingFunctionAsync<S, V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): Promise<S> {
 		await instructions.call(this_arg, frag, data, options)
 		return frag
 	}
@@ -83,11 +85,11 @@ export default class Processor<T, U extends object> {
 	/**
 	 * This object’s processing function, which contains instructions for processing the template.
 	 */
-	private readonly _INSTRUCTIONS: ProcessingFunction<T, U>;
+	private readonly _INSTRUCTIONS: ProcessingFunction<DocumentFragment, T, U>;
 	/**
 	 * Asynchronous {@link Processor#_INSTRUCTIONS}.
 	 */
-	private readonly _INSTRUCTIONS_ASYNC: ProcessingFunctionAsync<T, U>|null;
+	private readonly _INSTRUCTIONS_ASYNC: ProcessingFunctionAsync<DocumentFragment, T, U>|null;
 
 	/**
 	 * Construct a new Processor object.
@@ -95,7 +97,7 @@ export default class Processor<T, U extends object> {
 	 * @param instructions       the processing function to use
 	 * @param instructions_async an alternative processing function, asynchronous
 	 */
-	constructor(template: HTMLTemplateElement, instructions: ProcessingFunction<T, U>, instructions_async: ProcessingFunctionAsync<T, U>|null = null) {
+	constructor(template: HTMLTemplateElement, instructions: ProcessingFunction<DocumentFragment, T, U>, instructions_async: ProcessingFunctionAsync<DocumentFragment, T, U>|null = null) {
 		this._TEMPLATE           = template
 		this._INSTRUCTIONS       = instructions
 		this._INSTRUCTIONS_ASYNC = instructions_async
