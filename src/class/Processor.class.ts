@@ -65,6 +65,35 @@ export default class Processor<T, U extends object> {
 		return frag
 	}
 
+	static async populateListAsync<V, W extends object>(list: HTMLElement, instructions: ProcessingFunctionAsync<V, W>, dataset: V[], options?: W, this_arg: unknown = null): Promise<void> {
+		let template: HTMLTemplateElement|null = list.querySelector('template')
+		if (template === null) {
+			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
+		}
+		;    if (list instanceof HTMLOListElement       ) checkDOM(template, 'li'   )
+		else if (list instanceof HTMLUListElement       ) checkDOM(template, 'li'   )
+		else if (list instanceof HTMLTableElement       ) checkDOM(template, 'tbody')
+		else if (list instanceof HTMLTableSectionElement) checkDOM(template, 'tr'   )
+		else if (list instanceof HTMLTableRowElement    ) checkDOM(template, 'td'   )
+		else if (list instanceof HTMLDListElement       ) checkDOM_dl(template)
+		let processor: Processor<V, W> = new Processor<V, W>(template, () => {}, instructions)
+		list.append(... await Promise.all(dataset.map((data) => processor.processAsync(data, options, this_arg))))
+	}
+	static populateListSync<V, W extends object>(list: HTMLElement, instructions: ProcessingFunction<V, W>, dataset: V[], options?: W, this_arg: unknown = null): void {
+		let template: HTMLTemplateElement|null = list.querySelector('template')
+		if (template === null) {
+			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
+		}
+		;    if (list instanceof HTMLOListElement       ) checkDOM(template, 'li'   )
+		else if (list instanceof HTMLUListElement       ) checkDOM(template, 'li'   )
+		else if (list instanceof HTMLTableElement       ) checkDOM(template, 'tbody')
+		else if (list instanceof HTMLTableSectionElement) checkDOM(template, 'tr'   )
+		else if (list instanceof HTMLTableRowElement    ) checkDOM(template, 'td'   )
+		else if (list instanceof HTMLDListElement       ) checkDOM_dl(template)
+		let processor: Processor<V, W> = new Processor<V, W>(template, instructions)
+		list.append(...dataset.map((data) => processor.process(data, options, this_arg)))
+	}
+
 
 	/**
 	 * This object’s template, which is to be processed.
@@ -123,5 +152,47 @@ export default class Processor<T, U extends object> {
 		}
 		let frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
 		return Processor.processAsync(frag, this._INSTRUCTIONS_ASYNC, data, options, this_arg)
+	}
+}
+
+
+/**
+ * Check the proper DOM structure of a `<template>` element within a
+ * `<ol>`, `<ul>`, `<table>`, `<thead/tfoot/tbody>`, or `<tr>` element.
+ * @param   tpl           the `<template>` element within the list
+ * @param   child_tagname the tagname of the child within the `<template>`
+ * @throws  {TypeError} if the `<template>` has less than or more than 1 child element
+ * @throws  {TypeError} if the `<template>` has the incorrect child element type
+ */
+function checkDOM(tpl: HTMLTemplateElement, child_tagname: string): void {
+	if (tpl.content.children.length !== 1) {
+		throw new TypeError('The <template> must contain exactly 1 element.')
+	}
+	if (!tpl.content.children[0].matches(child_tagname)) {
+		throw new TypeError(`The <template> must contain exactly 1 <${child_tagname}>.`)
+	}
+}
+
+/**
+ * {@link checkDOM} for `<dl>` lists.
+ *
+ * Specifically, the `<template>` must contain at least 1 `<dt>` followed by at least 1 `<dd>`.
+ * @param   tpl           the `<template>` element within the list
+ * @param   child_tagname the tagname of the child within the `<template>`
+ * @throws  {TypeError} if the `<template>` has less than 1 child element
+ * @throws  {TypeError} if the `<template>` has the incorrect children element types
+ */
+function checkDOM_dl(tpl: HTMLTemplateElement): void {
+	if (tpl.content.children.length < 1) {
+		throw new TypeError('The <template> must contain at least 1 element.')
+	}
+	if (tpl.content.querySelector('dt') === null || tpl.content.querySelector('dd') === null) {
+		throw new TypeError(`The <template> must contain at least 1 <dt> and at least 1 <dd>.`)
+	}
+	if ([...tpl.content.querySelectorAll('*')].some((el) => !el.matches('dt, dd'))) {
+		throw new TypeError(`The <template> must only contain <dt> or <dd> elements.`)
+	}
+	if ([...tpl.content.children].indexOf(tpl.content.querySelector('dt:last-of-type') !) >= [...tpl.content.children].indexOf(tpl.content.querySelector('dd:first-of-type') !)) {
+		throw new TypeError(`All <dd> elements must follow all <dt> elements inside the <template>.`)
 	}
 }
