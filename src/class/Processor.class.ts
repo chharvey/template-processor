@@ -15,10 +15,7 @@
  * @param   data the data to fill the template when processing
  * @param   options additional processing options
  */
-export interface ProcessingFunction<T, U extends object> extends Function {
-	(this: any, frag: DocumentFragment, data: T, opts: U): void;
-	call(this_arg: any, frag: DocumentFragment, data: T, opts: U): void;
-}
+export type ProcessingFunction<T, U extends object> = (this: any, frag: DocumentFragment, data: T, opts: U) => void;
 /**
  * Asynchronous {@link ProcessingFunction}.
  * @param   <T> the type of the `data` parameter
@@ -27,10 +24,7 @@ export interface ProcessingFunction<T, U extends object> extends Function {
  * @param   data the data to fill the template upon rendering
  * @param   options additional processing options
  */
-export interface ProcessingFunctionAsync<T, U extends object> extends Function {
-	(this: any, frag: DocumentFragment, data: T, opts: U): Promise<void>;
-	call(this_arg: any, frag: DocumentFragment, data: T, opts: U): Promise<void>;
-}
+export type ProcessingFunctionAsync<T, U extends object> = (this: any, frag: DocumentFragment, data: T, opts: U) => Promise<void>;
 
 
 /**
