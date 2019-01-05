@@ -4,10 +4,15 @@ const typescript = require('gulp-typescript')
 
 const tsconfig = require('./tsconfig.json')
 
-gulp.task('dist', async function () {
+function dist() {
 	return gulp.src('./src/class/*.class.ts')
 		.pipe(typescript(tsconfig.compilerOptions))
 		.pipe(gulp.dest('./dist/class/'))
-})
+}
 
-gulp.task('build', ['dist'])
+const build = gulp.parallel(dist)
+
+module.exports = {
+	dist,
+	build,
+}

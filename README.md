@@ -1,10 +1,12 @@
 # template-processor
 A lightweight class for generating markup from a template and some data.
 
+
 ## Install
 ```bash
 npm install template-processor
 ```
+
 
 ## Example
 
@@ -31,7 +33,10 @@ API:
 
 1. Import the `Processor` class.
 2. The constructor’s `instructions` argument must be a function returning `void`.
-3. The `process` method returns a `DocumentFragment`.
+3. The constructor’s `instructions_async` argument, if provided, must be an asynchronous function returning a `Promise<void>`.
+	(If providing `instructions_async`, the `instructions` argument is still required. It could be an empty function or a fallback to the async.)
+4. The `process` method returns a `DocumentFragment`.
+5. The asynchronous `processAsync` method returns a `Promise<DocumentFragment>`.
 
 ### JavaScript
 ```js
@@ -47,17 +52,30 @@ function instructions(frag, data, opts) {
 		frag.querySelector('a').setAttribute('rel', 'external')
 	}
 }
+// if your instructions uses I/O, you can write an asynchronous function
+async function instructionsAsync(frag, data, opts) {
+	await doSomeAsyncStuff();
+}
 
 // construct a new processor with the stuff you wrote
 let my_processor = new Processor(template, instructions)
+// optionally provide the async instructions
+my_processor = new Processor(template, instructions, instructionsAsync)
 
-// process some data.
-let snippet_to_append = my_processor.process({
+// process some data synchronously
+let snippet = my_processor.process({
 	url: 'https://www.example.com/',
 	text: 'an example',
 }, { uppercase: true })
+document.body.append(snippet)
 
-document.body.append(snippet_to_append)
+// process some data asynchronously
+my_processor.processAsync({
+	url: 'https://www.example.com/',
+	text: 'an example',
+}, { uppercase: true }).then((snippet) => {
+	document.body.append(snippet)
+})
 ```
 
 ### TypeScript
@@ -76,18 +94,32 @@ function instructions(frag: DocumentFragment, data: DataType, opts: OptsType): v
 		frag.querySelector('a').setAttribute('rel', 'external')
 	}
 }
+// if your instructions uses I/O, you can write an asynchronous function
+async function instructionsAsync(frag: DocumentFragment, data: DataType, opts: OptsType): Promise<void> {
+	await doSomeAsyncStuff();
+}
 
 // construct a new processor with the stuff you wrote
 let my_processor: Processor<DataType, OptsType> = new Processor(template, instructions)
+// optionally provide the async instructions
+my_processor = new Processor(template, instructions, instructionsAsync)
 
-// process some data.
-let snippet_to_append: DocumentFragment = my_processor.process({
+// process some data synchronously
+let snippet: DocumentFragment = my_processor.process({
 	url: 'https://www.example.com/',
 	text: 'an example',
 }, { uppercase: true })
+document.body.append(snippet)
 
-document.body.append(snippet_to_append)
+// process some data asynchronously
+my_processor.processAsync({
+	url: 'https://www.example.com/',
+	text: 'an example',
+}, { uppercase: true }).then((snippet) => {
+	document.body.append(snippet)
+})
 ```
+
 
 ## Why?
 
@@ -124,5 +156,10 @@ let processor = new Processor(document.querySelector('ul > template'), (frag, da
 	frag.querySelector('i'                 ).className   = `icon icon-${data.name}`
 	frag.querySelector('slot[name="text"]' ).textContent = data.text
 })
+// sync way:
 document.querySelector('ul').append(...dataset.map((data) => processor.process(data)))
+// async way (promises):
+Promise.all(dataset.map((data) => processor.processAsync(data))).then((frags) => document.querySelector('ul').append(...frags))
+// async way (await):
+document.querySelector('ul').append(...await Promise.all(dataset.map((data) => processor.processAsync(data))))
 ```
