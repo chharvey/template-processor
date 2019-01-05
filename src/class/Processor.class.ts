@@ -15,7 +15,7 @@
  * @param   data the data to fill the template when processing
  * @param   options additional processing options
  */
-export type ProcessingFunction<T, U extends object> = (this: any, frag: DocumentFragment, data: T, opts: U) => void;
+export type ProcessingFunction<T, U extends object> = (this: any, frag: DocumentFragment, data: T, opts: U) => void
 /**
  * Asynchronous {@link ProcessingFunction}.
  * @param   <T> the type of the `data` parameter
@@ -24,7 +24,7 @@ export type ProcessingFunction<T, U extends object> = (this: any, frag: Document
  * @param   data the data to fill the template upon rendering
  * @param   options additional processing options
  */
-export type ProcessingFunctionAsync<T, U extends object> = (this: any, frag: DocumentFragment, data: T, opts: U) => Promise<void>;
+export type ProcessingFunctionAsync<T, U extends object> = (this: any, frag: DocumentFragment, data: T, opts: U) => Promise<void>
 
 
 /**
