@@ -66,8 +66,8 @@ export default class Processor<T, U extends object> {
 	 * @param   this_arg     the `this` context, if any, in which the instructions is called
 	 * @returns the processed content (modified)
 	 */
-	static async processAsync<S extends Document|DocumentFragment, V, W extends object>(frag: S, instructions: ProcessingFunctionAsync<S, V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): Promise<S> {
-		await instructions.call(this_arg, frag, data, options)
+	static async processAsync<S extends Document|DocumentFragment, V, W extends object>(frag: S, instructions: ProcessingFunctionAsync<S, V, W>, data: V|Promise<V>, options: W|Promise<W> = ({} as W), this_arg: unknown = null): Promise<S> {
+		await instructions.call(this_arg, frag, await data, await options)
 		return frag
 	}
 
@@ -118,10 +118,10 @@ export default class Processor<T, U extends object> {
 	 * @param   this_arg the `this` context, if any, in which this object’s instructions is called
 	 * @returns the processed output
 	 */
-	async processAsync(data: T, options?: U, this_arg?: unknown): Promise<DocumentFragment> {
+	async processAsync(data: T|Promise<T>, options?: U|Promise<U>, this_arg?: unknown): Promise<DocumentFragment> {
 		if (this._INSTRUCTIONS_ASYNC === null) {
 			console.warn('No asynchronous instructions found. Executing synchronous instructions instead…')
-			return this.process(data, options, this_arg)
+			return this.process(await data, await options, this_arg)
 		}
 		let frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
 		return Processor.processAsync(frag, this._INSTRUCTIONS_ASYNC, data, options, this_arg)

@@ -76,6 +76,14 @@ my_processor.processAsync({
 }, { uppercase: true }).then((snippet) => {
 	document.body.append(snippet)
 })
+
+// you can also pass in Promises for the data and options
+my_processor.processAsync(Promise.resolve({
+	url: 'https://www.example.com/',
+	text: 'an example',
+}), Promise.resolve({ uppercase: true })).then((snippet) => {
+	document.body.append(snippet)
+})
 ```
 
 ### TypeScript
@@ -116,6 +124,16 @@ my_processor.processAsync({
 	url: 'https://www.example.com/',
 	text: 'an example',
 }, { uppercase: true }).then((snippet) => {
+	document.body.append(snippet)
+})
+
+// you can also pass in Promises for the data and options
+let data: Promise<DataType> = Promise.resolve({
+	url: 'https://www.example.com/',
+	text: 'an example',
+})
+let opts: Promise<OptsType> = Promise.resolve({ uppercase: true })
+my_processor.processAsync(data, opts).then((snippet) => {
 	document.body.append(snippet)
 })
 ```
