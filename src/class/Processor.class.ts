@@ -116,7 +116,7 @@ export default class Processor<T, U extends object> {
 	 * @throws  {ReferenceError} if the given list does not contain a `<template>`
 	 * @throws  {TypeError}      if the `<template>` does not have valid children
 	 */
-	static populateList<V, W extends object>(list: HTMLElement, instructions: ProcessingFunction<V, W>, dataset: V[], options?: W, this_arg: unknown = null): void {
+	static populateList<V, W extends object>(list: HTMLElement, instructions: ProcessingFunction<DocumentFragment, V, W>, dataset: V[], options?: W, this_arg: unknown = null): void {
 		let template: HTMLTemplateElement|null = list.querySelector('template')
 		if (template === null) {
 			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
@@ -142,7 +142,7 @@ export default class Processor<T, U extends object> {
 	 * @throws  {ReferenceError} if the given list does not contain a `<template>`
 	 * @throws  {TypeError}      if the `<template>` does not have valid children
 	 */
-	static async populateListAsync<V, W extends object>(list: HTMLElement, instructions: ProcessingFunctionAsync<V, W>, dataset: V[]|Promise<V[]>, options?: W|Promise<W>, this_arg: unknown = null): Promise<void> {
+	static async populateListAsync<V, W extends object>(list: HTMLElement, instructions: ProcessingFunctionAsync<DocumentFragment, V, W>, dataset: V[]|Promise<V[]>, options?: W|Promise<W>, this_arg: unknown = null): Promise<void> {
 		let template: HTMLTemplateElement|null = list.querySelector('template')
 		if (template === null) {
 			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
