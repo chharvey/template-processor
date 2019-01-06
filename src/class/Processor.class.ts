@@ -65,6 +65,51 @@ export default class Processor<T, U extends object> {
 		return frag
 	}
 
+	/**
+	 * Populate a list or sequence of similar elements with items containing data.
+	 *
+	 * This method appends items to the end of the list.
+	 * The items are the result of rendering the given data.
+	 * In order to determine how the data is rendered, the given list must have
+	 * a `<template>` child, which in turn has a valid content model.
+	 *
+	 * Notes:
+	 * - This element may contain multiple `<template>` children, but this method uses only the first one.
+	 * - This element may also already have any number of children; they are not affected.
+	 *
+	 * Example:
+	 * ```js
+	 * let {document} = new jsdom.JSDOM(`
+	 * <ol>
+	 * 	<template>
+	 * 		<li>
+	 * 			<a href="{{ url }}">{{ text }}</a>
+	 * 		</li>
+	 * 	</template>
+	 * </ol>
+	 * `).window
+	 * let data = [
+	 * 	{ "url": "#0", "text": "Career Connections" },
+	 * 	{ "url": "#1", "text": "Getting Licensed & Certified" },
+	 * 	{ "url": "#2", "text": "Career resources" },
+	 * 	{ "url": "#3", "text": "Code of Ethics" }
+	 * ]
+	 * Processor.populateList(document.querySelector('ol'), function (f, d, o) {
+	 * 	f.querySelector('a').href        = d.url
+	 * 	f.querySelector('a').textContent = d.text
+	 * }, data)
+	 * ```
+	 *
+	 * @param   <V>          the type of the data to fill
+	 * @param   <W>          the type of the `options` object
+	 * @param   list         the list containing a template to process
+	 * @param   instructions the processing function to use
+	 * @param   dataset      the data to populate the list
+	 * @param   options      additional processing options for all items
+	 * @param   this_arg     the `this` context, if any, in which the instructions is called
+	 * @throws  {ReferenceError} if the given list does not contain a `<template>`
+	 * @throws  {TypeError}      if the `<template>` does not have valid children
+	 */
 	static populateList<V, W extends object>(list: HTMLElement, instructions: ProcessingFunction<V, W>, dataset: V[], options?: W, this_arg: unknown = null): void {
 		let template: HTMLTemplateElement|null = list.querySelector('template')
 		if (template === null) {
@@ -79,6 +124,18 @@ export default class Processor<T, U extends object> {
 		let processor: Processor<V, W> = new Processor<V, W>(template, instructions)
 		list.append(...dataset.map((data) => processor.process(data, options, this_arg)))
 	}
+	/**
+	 * Asynchronous {@link Processor.populateList}
+	 * @param   <V>          the type of the data to fill
+	 * @param   <W>          the type of the `options` object
+	 * @param   list         the list containing a template to process
+	 * @param   instructions the processing function to use
+	 * @param   dataset      the data to populate the list
+	 * @param   options      additional processing options for all items
+	 * @param   this_arg     the `this` context, if any, in which the instructions is called
+	 * @throws  {ReferenceError} if the given list does not contain a `<template>`
+	 * @throws  {TypeError}      if the `<template>` does not have valid children
+	 */
 	static async populateListAsync<V, W extends object>(list: HTMLElement, instructions: ProcessingFunctionAsync<V, W>, dataset: V[]|Promise<V[]>, options?: W|Promise<W>, this_arg: unknown = null): Promise<void> {
 		let template: HTMLTemplateElement|null = list.querySelector('template')
 		if (template === null) {
