@@ -15,7 +15,7 @@
  * @param   data the data to fill the template when processing
  * @param   options additional processing options
  */
-export type ProcessingFunction<T, U extends object> = (this: any, frag: DocumentFragment, data: T, opts: U) => void;
+export type ProcessingFunction<T, U extends object> = (this: any, frag: DocumentFragment, data: T, opts: U) => void
 /**
  * Asynchronous {@link ProcessingFunction}.
  * @param   <T> the type of the `data` parameter
@@ -24,7 +24,7 @@ export type ProcessingFunction<T, U extends object> = (this: any, frag: Document
  * @param   data the data to fill the template upon rendering
  * @param   options additional processing options
  */
-export type ProcessingFunctionAsync<T, U extends object> = (this: any, frag: DocumentFragment, data: T, opts: U) => Promise<void>;
+export type ProcessingFunctionAsync<T, U extends object> = (this: any, frag: DocumentFragment, data: T, opts: U) => Promise<void>
 
 
 /**
@@ -60,8 +60,8 @@ export default class Processor<T, U extends object> {
 	 * @param   this_arg     the `this` context, if any, in which the instructions is called
 	 * @returns the processed document fragment (modified)
 	 */
-	static async processAsync<V, W extends object>(frag: DocumentFragment, instructions: ProcessingFunctionAsync<V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): Promise<DocumentFragment> {
-		await instructions.call(this_arg, frag, data, options)
+	static async processAsync<V, W extends object>(frag: DocumentFragment, instructions: ProcessingFunctionAsync<V, W>, data: V|Promise<V>, options: W|Promise<W> = ({} as W), this_arg: unknown = null): Promise<DocumentFragment> {
+		await instructions.call(this_arg, frag, await data, await options)
 		return frag
 	}
 
@@ -145,10 +145,10 @@ export default class Processor<T, U extends object> {
 	 * @param   this_arg the `this` context, if any, in which this object’s instructions is called
 	 * @returns the processed output
 	 */
-	async processAsync(data: T, options?: U, this_arg?: unknown): Promise<DocumentFragment> {
+	async processAsync(data: T|Promise<T>, options?: U|Promise<U>, this_arg?: unknown): Promise<DocumentFragment> {
 		if (this._INSTRUCTIONS_ASYNC === null) {
 			console.warn('No asynchronous instructions found. Executing synchronous instructions instead…')
-			return this.process(data, options, this_arg)
+			return this.process(await data, await options, this_arg)
 		}
 		let frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
 		return Processor.processAsync(frag, this._INSTRUCTIONS_ASYNC, data, options, this_arg)

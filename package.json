@@ -1,6 +1,6 @@
 {
   "name": "template-processor",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A lightweight class for generating markup from a template and some data.",
   "main": "index.js",
   "scripts": {
@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/chharvey/template-processor#readme",
   "devDependencies": {
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "gulp-typescript": "^5.0.0",
     "typescript": "~3.2.2"
   }
