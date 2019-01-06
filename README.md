@@ -35,13 +35,13 @@ API:
 2. The constructor’s `instructions` argument must be a function returning `void`.
 3. The constructor’s `instructions_async` argument, if provided, must be an asynchronous function returning a `Promise<void>`.
 	(If providing `instructions_async`, the `instructions` argument is still required. It could be an empty function or a fallback to the async.)
-4. The `process` method returns a `DocumentFragment`.
-5. The asynchronous `processAsync` method returns a `Promise<DocumentFragment>`.
+4. The `process` instance method returns a `DocumentFragment`.
+5. The asynchronous `processAsync` instance method returns a `Promise<DocumentFragment>`.
 
 ### JavaScript
 ```js
 // import the module
-const {Processor} = require('template-processor')
+const { Processor } = require('template-processor')
 
 // get your own template & write your own instructions
 let template = document.querySelector('template')
@@ -89,7 +89,7 @@ my_processor.processAsync(Promise.resolve({
 ### TypeScript
 ```ts
 // import the module
-import {Processor} from 'template-processor'
+import { Processor } from 'template-processor'
 
 // get your own template & write your own instructions
 type DataType = { url: string; text: string; }
@@ -135,6 +135,123 @@ let data: Promise<DataType> = Promise.resolve({
 let opts: Promise<OptsType> = Promise.resolve({ uppercase: true })
 my_processor.processAsync(data, opts).then((snippet) => {
 	document.body.append(snippet)
+})
+```
+
+
+## Whole Document Example
+
+Sometimes you don’t have a `<template>` element, or you have an entire document to process,
+including for example a `<head>` element or attributes on the `<html>` or `<body>` elements.
+Template elements may only contain flow content, so we cannot process document content
+or metadata content in the same way.
+
+Starting in v2, we can process ‘templates’ of Document objects.
+The *static* methods `Processor.process` and `Processor.processAsync`
+may now take and return a `Document` object (in addition to `DocumentFragment`).
+
+Note that in these examples, we are not constructing a new Processor object, but simply using static methods.
+
+API:
+
+1. Import the `Processor` class.
+2. The `instructions` argument must be a function returning `void`.
+3. The `instructions_async` argument must be an asynchronous function returning a `Promise<void>`.
+4. The `Processor.process` static method returns a `Document` or `DocumentFragment`, depending on the first argument.
+5. The asynchronous `Processor.processAsync` static method returns a `Promise<Document>` or `Promise<DocumentFragment>`, depending on the first argument.
+
+
+### JavaScript
+```js
+// import the module
+const { Processor } = require('template-processor')
+
+// get your own document & write your own instructions
+let document;
+function instructions(doc, data, opts) {
+	doc.querySelector('a').href        = data.url
+	doc.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
+	if (data.url.slice(0,4) === 'http') {
+		doc.querySelector('a').setAttribute('rel', 'external')
+	}
+}
+// if your instructions uses I/O, you can write an asynchronous function
+async function instructionsAsync(doc, data, opts) {
+	await doSomeAsyncStuff();
+}
+
+// process some data synchronously
+// Since a `Document` object is passed, the modified `Document` is returned.
+// If a `DocumentFragment` object were passed, it would return that modified `DocumentFragment`.
+let output = Processor.process(document, instructions, {
+	url: 'https://www.example.com/',
+	text: 'an example',
+}, { uppercase: true })
+fs.writeFileSync('output.html', output.toString(), 'utf8')
+
+// process some data asynchronously
+Processor.processAsync(document, instructionsAsync, {
+	url: 'https://www.example.com/',
+	text: 'an example',
+}, { uppercase: true }).then((output) => {
+	return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
+})
+
+// you can also pass in Promises for the data and options
+Processor.processAsync(document, instructionsAsync, Promise.resolve({
+	url: 'https://www.example.com/',
+	text: 'an example',
+}), Promise.resolve({ uppercase: true })).then((output) => {
+	return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
+})
+```
+
+### TypeScript
+```ts
+// import the module
+import { Processor } from 'template-processor'
+
+// get your own document & write your own instructions
+type DataType = { url: string; text: string; }
+type OptsType = { uppercase?: boolean; }
+let document: Document;
+function instructions(doc: Document, data: DataType, opts: OptsType): void {
+	doc.querySelector('a').href        = data.url
+	doc.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
+	if (data.url.slice(0,4) === 'http') {
+		doc.querySelector('a').setAttribute('rel', 'external')
+	}
+}
+// if your instructions uses I/O, you can write an asynchronous function
+async function instructionsAsync(doc: Document, data: DataType, opts: OptsType): Promise<void> {
+	await doSomeAsyncStuff();
+}
+
+// process some data synchronously
+// Since a `Document` object is passed, the modified `Document` is returned.
+// If a `DocumentFragment` object were passed, it would return that modified `DocumentFragment`.
+let output: Document = Processor.process(document, instructions, {
+	url: 'https://www.example.com/',
+	text: 'an example',
+}, { uppercase: true })
+fs.writeFileSync('output.html', output.toString(), 'utf8')
+
+// process some data asynchronously
+Processor.processAsync(document, instructionsAsync, {
+	url: 'https://www.example.com/',
+	text: 'an example',
+}, { uppercase: true }).then((output) => {
+	return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
+})
+
+// you can also pass in Promises for the data and options
+let data: Promise<DataType> = Promise.resolve({
+	url: 'https://www.example.com/',
+	text: 'an example',
+})
+let opts: Promise<OptsType> = Promise.resolve({ uppercase: true })
+Processor.processAsync(document, instructionsAsync, data, opts).then((output) => {
+	return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
 })
 ```
 
