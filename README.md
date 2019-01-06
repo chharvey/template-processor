@@ -196,6 +196,14 @@ Processor.processAsync(document, instructionsAsync, {
 }, { uppercase: true }).then((output) => {
 	return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
 })
+
+// you can also pass in Promises for the data and options
+Processor.processAsync(document, instructionsAsync, Promise.resolve({
+	url: 'https://www.example.com/',
+	text: 'an example',
+}), Promise.resolve({ uppercase: true })).then((output) => {
+	return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
+})
 ```
 
 ### TypeScript
@@ -233,6 +241,16 @@ Processor.processAsync(document, instructionsAsync, {
 	url: 'https://www.example.com/',
 	text: 'an example',
 }, { uppercase: true }).then((output) => {
+	return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
+})
+
+// you can also pass in Promises for the data and options
+let data: Promise<DataType> = Promise.resolve({
+	url: 'https://www.example.com/',
+	text: 'an example',
+})
+let opts: Promise<OptsType> = Promise.resolve({ uppercase: true })
+Processor.processAsync(document, instructionsAsync, data, opts).then((output) => {
 	return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
 })
 ```
