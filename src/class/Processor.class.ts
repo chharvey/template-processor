@@ -65,21 +65,7 @@ export default class Processor<T, U extends object> {
 		return frag
 	}
 
-	static async populateListAsync<V, W extends object>(list: HTMLElement, instructions: ProcessingFunctionAsync<V, W>, dataset: V[], options?: W, this_arg: unknown = null): Promise<void> {
-		let template: HTMLTemplateElement|null = list.querySelector('template')
-		if (template === null) {
-			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
-		}
-		;    if (list instanceof HTMLOListElement       ) checkDOM(template, 'li'   )
-		else if (list instanceof HTMLUListElement       ) checkDOM(template, 'li'   )
-		else if (list instanceof HTMLTableElement       ) checkDOM(template, 'tbody')
-		else if (list instanceof HTMLTableSectionElement) checkDOM(template, 'tr'   )
-		else if (list instanceof HTMLTableRowElement    ) checkDOM(template, 'td'   )
-		else if (list instanceof HTMLDListElement       ) checkDOM_dl(template)
-		let processor: Processor<V, W> = new Processor<V, W>(template, () => {}, instructions)
-		list.append(... await Promise.all(dataset.map((data) => processor.processAsync(data, options, this_arg))))
-	}
-	static populateListSync<V, W extends object>(list: HTMLElement, instructions: ProcessingFunction<V, W>, dataset: V[], options?: W, this_arg: unknown = null): void {
+	static populateList<V, W extends object>(list: HTMLElement, instructions: ProcessingFunction<V, W>, dataset: V[], options?: W, this_arg: unknown = null): void {
 		let template: HTMLTemplateElement|null = list.querySelector('template')
 		if (template === null) {
 			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
@@ -92,6 +78,20 @@ export default class Processor<T, U extends object> {
 		else if (list instanceof HTMLDListElement       ) checkDOM_dl(template)
 		let processor: Processor<V, W> = new Processor<V, W>(template, instructions)
 		list.append(...dataset.map((data) => processor.process(data, options, this_arg)))
+	}
+	static async populateListAsync<V, W extends object>(list: HTMLElement, instructions: ProcessingFunctionAsync<V, W>, dataset: V[]|Promise<V[]>, options?: W|Promise<W>, this_arg: unknown = null): Promise<void> {
+		let template: HTMLTemplateElement|null = list.querySelector('template')
+		if (template === null) {
+			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
+		}
+		;    if (list instanceof HTMLOListElement       ) checkDOM(template, 'li'   )
+		else if (list instanceof HTMLUListElement       ) checkDOM(template, 'li'   )
+		else if (list instanceof HTMLTableElement       ) checkDOM(template, 'tbody')
+		else if (list instanceof HTMLTableSectionElement) checkDOM(template, 'tr'   )
+		else if (list instanceof HTMLTableRowElement    ) checkDOM(template, 'td'   )
+		else if (list instanceof HTMLDListElement       ) checkDOM_dl(template)
+		let processor: Processor<V, W> = new Processor<V, W>(template, () => {}, instructions)
+		list.append(... await Promise.all((await dataset).map((data) => processor.processAsync(data, options, this_arg))))
 	}
 
 
