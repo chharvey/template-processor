@@ -102,7 +102,7 @@ export default class Processor<T, U extends object> {
 	 */
 	process(data: T, options?: U, this_arg?: unknown): DocumentFragment {
 		if (this._INSTRUCTIONS_ASYNC !== null) {
-			console.warn('An asynchronous instruction is available; did you mean to call `processAsync()`?')
+			console.info('An asynchronous instruction is available; did you mean to call `processAsync()`?')
 		}
 		let frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
 		return Processor.process(frag, this._INSTRUCTIONS, data, options, this_arg)
