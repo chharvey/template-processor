@@ -30,7 +30,7 @@ export type ProcessingFunctionAsync<T, U extends object> = (this: any, frag: Doc
 /**
  * A Processor stores processing operations for a template and a processing function.
  */
-export default class Processor<T, U extends object> {
+export default class Processor<T, U extends object = object> {
 	/**
 	 * Process a document fragment with some data, and return the same fragment, modified.
 	 *
