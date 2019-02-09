@@ -74,12 +74,12 @@ export default class Processor<T, U extends object> {
 	 * a `<template>` child, which in turn has a valid content model.
 	 *
 	 * Notes:
-	 * - This element may contain multiple `<template>` children, but this method uses only the first one.
-	 * - This element may also already have any number of children; they are not affected.
+	 * - The list element may contain multiple `<template>` children, but this method uses only the first one.
+	 * - The list element may also already have any number of children; they are not affected.
 	 *
 	 * Example:
 	 * ```js
-	 * let {document} = new jsdom.JSDOM(`
+	 * let { document } = new jsdom.JSDOM(`
 	 * <ol>
 	 * 	<template>
 	 * 		<li>
@@ -88,16 +88,19 @@ export default class Processor<T, U extends object> {
 	 * 	</template>
 	 * </ol>
 	 * `).window
-	 * let data = [
+	 * let dataset = [
 	 * 	{ "url": "#0", "text": "Career Connections" },
 	 * 	{ "url": "#1", "text": "Getting Licensed & Certified" },
 	 * 	{ "url": "#2", "text": "Career resources" },
 	 * 	{ "url": "#3", "text": "Code of Ethics" }
 	 * ]
+	 * let options = {
+	 * 	suffix: ' &rarr;'
+	 * }
 	 * Processor.populateList(document.querySelector('ol'), function (f, d, o) {
 	 * 	f.querySelector('a').href        = d.url
-	 * 	f.querySelector('a').textContent = d.text
-	 * }, data)
+	 * 	f.querySelector('a').textContent = d.text + o.suffix
+	 * }, dataset, options)
 	 * ```
 	 *
 	 * @param   <V>          the type of the data to fill

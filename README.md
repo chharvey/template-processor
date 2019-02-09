@@ -177,7 +177,27 @@ let processor = new Processor(document.querySelector('ul > template'), (frag, da
 // sync way:
 document.querySelector('ul').append(...dataset.map((data) => processor.process(data)))
 // async way (promises):
-Promise.all(dataset.map((data) => processor.processAsync(data))).then((frags) => document.querySelector('ul').append(...frags))
+Promise.all(dataset.map((data) => processor.processAsync(data)))
+	.then((frags) => document.querySelector('ul').append(...frags))
 // async way (await):
 document.querySelector('ul').append(...await Promise.all(dataset.map((data) => processor.processAsync(data))))
+```
+
+Starting in v1.2, we can do the above much more efficiently with two new static methods:
+`Processor.populateList` and `Processor.populateListAsync`.
+They check for a `<template>` inside the list and ensure it has the correct markup structure.
+
+```js
+// sync way:
+Processor.populateList(document.querySelector('ul'), (frag, data, opts) => {
+	frag.querySelector('a.c-LinkList__Link').href        = data.url
+	frag.querySelector('i'                 ).className   = `icon icon-${data.name}`
+	frag.querySelector('slot[name="text"]' ).textContent = data.text
+}, dataset)
+// async way:
+Processor.populateListAsync(document.querySelector('ul'), async (frag, data, opts) => {
+	frag.querySelector('a.c-LinkList__Link').href        = data.url
+	frag.querySelector('i'                 ).className   = `icon icon-${data.name}`
+	frag.querySelector('slot[name="text"]' ).textContent = data.text
+}, Promise.resolve(dataset))
 ```
