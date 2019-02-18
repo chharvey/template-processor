@@ -27,5 +27,8 @@
     "gulp": "^4.0.0",
     "gulp-typescript": "^5.0.0",
     "typescript": "~3.3.3"
+  },
+  "dependencies": {
+    "extrajs": "^0.18.1"
   }
 }
