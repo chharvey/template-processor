@@ -1,3 +1,6 @@
+import * as xjs from 'extrajs'
+
+
 /**
  * A processing function specifies how to transform a template into markup.
  *
@@ -118,13 +121,18 @@ export default class Processor<T, U extends object = object> {
 		if (template === null) {
 			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
 		}
-		;    if (list instanceof HTMLOListElement       ) checkDOM(template, 'li'   )
-		else if (list instanceof HTMLUListElement       ) checkDOM(template, 'li'   )
-		else if (list instanceof HTMLTableElement       ) checkDOM(template, 'tbody')
-		else if (list instanceof HTMLTableSectionElement) checkDOM(template, 'tr'   )
-		else if (list instanceof HTMLTableRowElement    ) checkDOM(template, 'td'   )
-		else if (list instanceof HTMLDListElement       ) checkDOM_dl(template)
-		let processor: Processor<V, W> = new Processor<V, W>(template, instructions)
+		xjs.Object.switch<void>(list.tagName.toLowerCase(), {
+			'ol'    : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'li'   ),
+			'ul'    : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'li'   ),
+			'table' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tbody'),
+			'thead' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tr'   ),
+			'tbody' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tr'   ),
+			'tfoot' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tr'   ),
+			'tr'    : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'td'   ),
+			'dl'    : ( tpl: HTMLTemplateElement) => checkDOM_dl(tpl),
+			default : (_tpl: HTMLTemplateElement) => {},
+		})(template)
+		let processor: Processor<V, W> = new Processor(template, instructions)
 		list.append(...dataset.map((data) => processor.process(data, options, this_arg)))
 	}
 	/**
@@ -144,13 +152,18 @@ export default class Processor<T, U extends object = object> {
 		if (template === null) {
 			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
 		}
-		;    if (list instanceof HTMLOListElement       ) checkDOM(template, 'li'   )
-		else if (list instanceof HTMLUListElement       ) checkDOM(template, 'li'   )
-		else if (list instanceof HTMLTableElement       ) checkDOM(template, 'tbody')
-		else if (list instanceof HTMLTableSectionElement) checkDOM(template, 'tr'   )
-		else if (list instanceof HTMLTableRowElement    ) checkDOM(template, 'td'   )
-		else if (list instanceof HTMLDListElement       ) checkDOM_dl(template)
-		let processor: Processor<V, W> = new Processor<V, W>(template, () => {}, instructions)
+		xjs.Object.switch<void>(list.tagName.toLowerCase(), {
+			'ol'    : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'li'   ),
+			'ul'    : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'li'   ),
+			'table' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tbody'),
+			'thead' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tr'   ),
+			'tbody' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tr'   ),
+			'tfoot' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tr'   ),
+			'tr'    : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'td'   ),
+			'dl'    : ( tpl: HTMLTemplateElement) => checkDOM_dl(tpl),
+			default : (_tpl: HTMLTemplateElement) => {},
+		})(template)
+		let processor: Processor<V, W> = new Processor(template, () => {}, instructions)
 		list.append(... await Promise.all((await dataset).map((data) => processor.processAsync(data, options, this_arg))))
 	}
 
