@@ -39,86 +39,127 @@ API:
 5. The asynchronous `processAsync` method returns a `Promise<DocumentFragment>`.
 
 ### JavaScript
-```js
-// import the module
-const {Processor} = require('template-processor')
 
-// get your own template & write your own instructions
-let template = document.querySelector('template')
-function instructions(frag, data, opts) {
-	frag.querySelector('a').href        = data.url
-	frag.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
-	if (data.url.slice(0,4) === 'http') {
-		frag.querySelector('a').setAttribute('rel', 'external')
+1. Import the module.
+	```js
+	const { Processor } = require('template-processor')
+	```
+
+2. Get your own template & write your own instructions.
+	```js
+	let template = document.querySelector('template')
+	function instructions(frag, data, opts) {
+		frag.querySelector('a').href        = data.url
+		frag.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
+		if (data.url.slice(0,4) === 'http') {
+			frag.querySelector('a').setAttribute('rel', 'external')
+		}
 	}
-}
-// if your instructions uses I/O, you can write an asynchronous function
-async function instructionsAsync(frag, data, opts) {
-	await doSomeAsyncStuff();
-}
+	```
+	If your instructions uses I/O, you can write an asynchronous function.
+	Note that this function must not take promises as arguments.
+	```js
+	async function instructionsAsync(frag, data, opts) {
+		await doSomeAsyncStuff();
+	}
+	```
 
-// construct a new processor with the stuff you wrote
-let my_processor = new Processor(template, instructions)
-// optionally provide the async instructions
-my_processor = new Processor(template, instructions, instructionsAsync)
+3. Construct a new processor with the stuff you wrote
+	(optionally provide the async instructions).
+	```js
+	let my_processor = new Processor(template, instructions)
+	my_processor = new Processor(template, instructions, instructionsAsync)
+	```
 
-// process some data synchronously
-let snippet = my_processor.process({
-	url: 'https://www.example.com/',
-	text: 'an example',
-}, { uppercase: true })
-document.body.append(snippet)
-
-// process some data asynchronously
-my_processor.processAsync({
-	url: 'https://www.example.com/',
-	text: 'an example',
-}, { uppercase: true }).then((snippet) => {
+4. Process some data (synchronously or asynchronously).
+	```js
+	let snippet = my_processor.process({
+		url: 'https://www.example.com/',
+		text: 'an example',
+	}, { uppercase: true })
 	document.body.append(snippet)
-})
-```
+
+	my_processor.processAsync({
+		url: 'https://www.example.com/',
+		text: 'an example',
+	}, { uppercase: true }).then((snippet) => {
+		document.body.append(snippet)
+	})
+	```
+	You can also pass in promises for the data and options.
+	Here’s where the promises will be awaited.
+	```js
+	my_processor.processAsync(Promise.resolve({
+		url: 'https://www.example.com/',
+		text: 'an example',
+	}), Promise.resolve({ uppercase: true })).then((snippet) => {
+		document.body.append(snippet)
+	})
+	```
 
 ### TypeScript
-```ts
-// import the module
-import {Processor} from 'template-processor'
 
-// get your own template & write your own instructions
-type DataType = { url: string; text: string; }
-type OptsType = { uppercase?: boolean; }
-let template: HTMLTemplateElement = document.querySelector('template') !
-function instructions(frag: DocumentFragment, data: DataType, opts: OptsType): void {
-	frag.querySelector('a').href        = data.url
-	frag.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
-	if (data.url.slice(0,4) === 'http') {
-		frag.querySelector('a').setAttribute('rel', 'external')
+1. Import the module.
+	```ts
+	import { Processor } from 'template-processor'
+	```
+
+2. Get your own template & write your own instructions.
+	```ts
+	type DataType = { url: string; text: string; }
+	type OptsType = { uppercase?: boolean; }
+
+	let template: HTMLTemplateElement = document.querySelector('template') !
+	function instructions(frag: DocumentFragment, data: DataType, opts: OptsType): void {
+		frag.querySelector('a').href        = data.url
+		frag.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
+		if (data.url.slice(0,4) === 'http') {
+			frag.querySelector('a').setAttribute('rel', 'external')
+		}
 	}
-}
-// if your instructions uses I/O, you can write an asynchronous function
-async function instructionsAsync(frag: DocumentFragment, data: DataType, opts: OptsType): Promise<void> {
-	await doSomeAsyncStuff();
-}
+	```
+	If your instructions uses I/O, you can write an asynchronous function.
+	Note that this function must not take promises as arguments.
+	```ts
+	async function instructionsAsync(frag: DocumentFragment, data: DataType, opts: OptsType): Promise<void> {
+		await doSomeAsyncStuff();
+	}
+	```
 
-// construct a new processor with the stuff you wrote
-let my_processor: Processor<DataType, OptsType> = new Processor(template, instructions)
-// optionally provide the async instructions
-my_processor = new Processor(template, instructions, instructionsAsync)
+3. Construct a new processor with the stuff you wrote
+	(optionally provide the async instructions).
+	```ts
+	let my_processor: Processor<DataType, OptsType> = new Processor(template, instructions)
+	my_processor = new Processor(template, instructions, instructionsAsync)
+	```
 
-// process some data synchronously
-let snippet: DocumentFragment = my_processor.process({
-	url: 'https://www.example.com/',
-	text: 'an example',
-}, { uppercase: true })
-document.body.append(snippet)
-
-// process some data asynchronously
-my_processor.processAsync({
-	url: 'https://www.example.com/',
-	text: 'an example',
-}, { uppercase: true }).then((snippet) => {
+4. Process some data (synchronously or asynchronously).
+	```ts
+	let snippet: DocumentFragment = my_processor.process({
+		url: 'https://www.example.com/',
+		text: 'an example',
+	}, { uppercase: true })
 	document.body.append(snippet)
-})
-```
+
+	my_processor.processAsync({
+		url: 'https://www.example.com/',
+		text: 'an example',
+	}, { uppercase: true }).then((snippet) => {
+		document.body.append(snippet)
+	})
+	```
+	You can also pass in promises for the data and options.
+	Here’s where the promises will be awaited.
+	```ts
+	let data: Promise<DataType> = Promise.resolve({
+		url: 'https://www.example.com/',
+		text: 'an example',
+	})
+	let opts: Promise<OptsType> = Promise.resolve({ uppercase: true })
+	my_processor.processAsync(data, opts).then((snippet) => {
+		document.body.append(snippet)
+	})
+	```
 
 
 ## Why?
@@ -126,7 +167,7 @@ my_processor.processAsync({
 The point is to have one template and one instruction, but tons of data.
 
 ```js
-const dataset = [
+let dataset = [
 	{ "name": "twitter" , "url": "//twitter.com/god"    , "text": "Follow God on Twitter"        },
 	{ "name": "google"  , "url": "//plus.google.com/god", "text": "Follow God on Google+"        },
 	{ "name": "facebook", "url": "//facebook.com/god"   , "text": "Like God on Facebook"         },
@@ -134,6 +175,12 @@ const dataset = [
 	{ "name": "youtube" , "url": "//youtube.com/god"    , "text": "Watch God on YouTube"         },
 	// even more and more
 ]
+// or it could be a promise:
+dataset = Promise.resolve([
+	{ "name": "twitter" , "url": "//twitter.com/god"    , "text": "Follow God on Twitter"        },
+	// even more and more
+])
+
 const document = createDocument`
 <html>
 <body>
@@ -151,15 +198,60 @@ const document = createDocument`
 </body>
 </html>
 `
+```
+
+Synchronously:
+```js
 let processor = new Processor(document.querySelector('ul > template'), (frag, data, opts) => {
 	frag.querySelector('a.c-LinkList__Link').href        = data.url
 	frag.querySelector('i'                 ).className   = `icon icon-${data.name}`
 	frag.querySelector('slot[name="text"]' ).textContent = data.text
 })
-// sync way:
+
 document.querySelector('ul').append(...dataset.map((data) => processor.process(data)))
-// async way (promises):
-Promise.all(dataset.map((data) => processor.processAsync(data))).then((frags) => document.querySelector('ul').append(...frags))
-// async way (await):
-document.querySelector('ul').append(...await Promise.all(dataset.map((data) => processor.processAsync(data))))
+```
+
+Asynchronously:
+```js
+let processor = new Processor(document.querySelector('ul > template'), () => {}, async (frag, data, opts) => {
+	await doSomeAsyncStuff();
+	frag.querySelector('a.c-LinkList__Link').href        = data.url
+	frag.querySelector('i'                 ).className   = `icon icon-${data.name}`
+	frag.querySelector('slot[name="text"]' ).textContent = data.text
+})
+
+// with promises:
+dataset.then((datapoints) =>
+	Promise.all(datapoints.map((data) => processor.processAsync(data)))
+).then((frags) =>
+	document.querySelector('ul').append(...frags)
+)
+
+// with await:
+document.querySelector('ul').append(
+	...await Promise.all((await dataset).map((data) => processor.processAsync(data)))
+)
+```
+
+Starting in v1.2, we can do the above much more efficiently with two new static methods:
+`Processor.populateList` and `Processor.populateListAsync`.
+They check for a `<template>` inside the list and ensure it has the correct markup structure.
+
+Synchronously:
+```js
+Processor.populateList(document.querySelector('ul'), (frag, data, opts) => {
+	frag.querySelector('a.c-LinkList__Link').href        = data.url
+	frag.querySelector('i'                 ).className   = `icon icon-${data.name}`
+	frag.querySelector('slot[name="text"]' ).textContent = data.text
+}, dataset)
+```
+
+Asynchronously:
+```js
+Processor.populateListAsync(document.querySelector('ul'), async (frag, data, opts) => {
+	await doSomeAsyncStuff();
+	frag.querySelector('a.c-LinkList__Link').href        = data.url
+	frag.querySelector('i'                 ).className   = `icon icon-${data.name}`
+	frag.querySelector('slot[name="text"]' ).textContent = data.text
+}, Promise.resolve(dataset))
 ```
