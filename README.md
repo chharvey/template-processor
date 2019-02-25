@@ -185,98 +185,123 @@ API:
 
 
 ### JavaScript
-```js
-// import the module
-const { Processor } = require('template-processor')
 
-// get your own document & write your own instructions
-let document;
-function instructions(doc, data, opts) {
-	doc.querySelector('a').href        = data.url
-	doc.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
-	if (data.url.slice(0,4) === 'http') {
-		doc.querySelector('a').setAttribute('rel', 'external')
+1. Import the module.
+	```js
+	const { Processor } = require('template-processor')
+	```
+
+2. Get your own template & write your own instructions.
+	```js
+	let document;
+	function instructions(doc, data, opts) {
+		doc.querySelector('a').href        = data.url
+		doc.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
+		if (data.url.slice(0,4) === 'http') {
+			doc.querySelector('a').setAttribute('rel', 'external')
+		}
 	}
-}
-// if your instructions uses I/O, you can write an asynchronous function
-async function instructionsAsync(doc, data, opts) {
-	await doSomeAsyncStuff();
-}
+	```
+	If your instructions uses I/O, you can write an asynchronous function.
+	Note that this function must not take promises as arguments.
+	```js
+	async function instructionsAsync(doc, data, opts) {
+		await doSomeAsyncStuff();
+	}
+	```
 
-// process some data synchronously
-// Since a `Document` object is passed, the modified `Document` is returned.
-// If a `DocumentFragment` object were passed, it would return that modified `DocumentFragment`.
-let output = Processor.process(document, instructions, {
-	url: 'https://www.example.com/',
-	text: 'an example',
-}, { uppercase: true })
-fs.writeFileSync('output.html', output.toString(), 'utf8')
+3. Process some data (synchronously or asynchronously).
+	```js
+	const fs = require('fs')
+	const util = require('util')
 
-// process some data asynchronously
-Processor.processAsync(document, instructionsAsync, {
-	url: 'https://www.example.com/',
-	text: 'an example',
-}, { uppercase: true }).then((output) => {
-	return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
-})
+	// Since a `Document` object is passed, the modified `Document` is returned.
+	// If a `DocumentFragment` object were passed, it would return that modified `DocumentFragment`.
+	let output = Processor.process(document, instructions, {
+		url: 'https://www.example.com/',
+		text: 'an example',
+	}, { uppercase: true })
+	fs.writeFileSync('output.html', output.toString(), 'utf8')
 
-// you can also pass in Promises for the data and options
-Processor.processAsync(document, instructionsAsync, Promise.resolve({
-	url: 'https://www.example.com/',
-	text: 'an example',
-}), Promise.resolve({ uppercase: true })).then((output) => {
-	return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
-})
-```
+	Processor.processAsync(document, instructionsAsync, {
+		url: 'https://www.example.com/',
+		text: 'an example',
+	}, { uppercase: true }).then((output) => {
+		return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
+	})
+	```
+	You can also pass in promises for the data and options.
+	Here’s where the promises will be awaited.
+	```js
+	Processor.processAsync(document, instructionsAsync, Promise.resolve({
+		url: 'https://www.example.com/',
+		text: 'an example',
+	}), Promise.resolve({ uppercase: true })).then((output) => {
+		return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
+	})
+	```
 
 ### TypeScript
-```ts
-// import the module
-import { Processor } from 'template-processor'
 
-// get your own document & write your own instructions
-type DataType = { url: string; text: string; }
-type OptsType = { uppercase?: boolean; }
-let document: Document;
-function instructions(doc: Document, data: DataType, opts: OptsType): void {
-	doc.querySelector('a').href        = data.url
-	doc.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
-	if (data.url.slice(0,4) === 'http') {
-		doc.querySelector('a').setAttribute('rel', 'external')
+1. Import the module.
+	```ts
+	import { Processor } from 'template-processor'
+	```
+
+2. Get your own template & write your own instructions.
+	```ts
+	type DataType = { url: string; text: string; }
+	type OptsType = { uppercase?: boolean; }
+
+	let document: Document;
+	function instructions(doc: Document, data: DataType, opts: OptsType): void {
+		doc.querySelector('a').href        = data.url
+		doc.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
+		if (data.url.slice(0,4) === 'http') {
+			doc.querySelector('a').setAttribute('rel', 'external')
+		}
 	}
-}
-// if your instructions uses I/O, you can write an asynchronous function
-async function instructionsAsync(doc: Document, data: DataType, opts: OptsType): Promise<void> {
-	await doSomeAsyncStuff();
-}
+	```
+	If your instructions uses I/O, you can write an asynchronous function.
+	Note that this function must not take promises as arguments.
+	```ts
+	async function instructionsAsync(doc: Document, data: DataType, opts: OptsType): Promise<void> {
+		await doSomeAsyncStuff();
+	}
+	```
 
-// process some data synchronously
-// Since a `Document` object is passed, the modified `Document` is returned.
-// If a `DocumentFragment` object were passed, it would return that modified `DocumentFragment`.
-let output: Document = Processor.process(document, instructions, {
-	url: 'https://www.example.com/',
-	text: 'an example',
-}, { uppercase: true })
-fs.writeFileSync('output.html', output.toString(), 'utf8')
+3. Process some data (synchronously or asynchronously).
+	```ts
+	import * as fs from 'fs'
+	import * as util from 'util'
 
-// process some data asynchronously
-Processor.processAsync(document, instructionsAsync, {
-	url: 'https://www.example.com/',
-	text: 'an example',
-}, { uppercase: true }).then((output) => {
-	return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
-})
+	// Since a `Document` object is passed, the modified `Document` is returned.
+	// If a `DocumentFragment` object were passed, it would return that modified `DocumentFragment`.
+	let output: Document = Processor.process(document, instructions, {
+		url: 'https://www.example.com/',
+		text: 'an example',
+	}, { uppercase: true })
+	fs.writeFileSync('output.html', output.toString(), 'utf8')
 
-// you can also pass in Promises for the data and options
-let data: Promise<DataType> = Promise.resolve({
-	url: 'https://www.example.com/',
-	text: 'an example',
-})
-let opts: Promise<OptsType> = Promise.resolve({ uppercase: true })
-Processor.processAsync(document, instructionsAsync, data, opts).then((output) => {
-	return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
-})
-```
+	Processor.processAsync(document, instructionsAsync, {
+		url: 'https://www.example.com/',
+		text: 'an example',
+	}, { uppercase: true }).then((output) => {
+		return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
+	})
+	```
+	You can also pass in promises for the data and options.
+	Here’s where the promises will be awaited.
+	```ts
+	let data: Promise<DataType> = Promise.resolve({
+		url: 'https://www.example.com/',
+		text: 'an example',
+	})
+	let opts: Promise<OptsType> = Promise.resolve({ uppercase: true })
+	Processor.processAsync(document, instructionsAsync, data, opts).then((output) => {
+		return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
+	})
+	```
 
 
 ## Why?
