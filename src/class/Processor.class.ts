@@ -18,7 +18,7 @@ import * as xjs from 'extrajs'
  * @param   data the data to fill the template when processing
  * @param   options additional processing options
  */
-export type ProcessingFunction<T, U extends object> = (this: any, frag: DocumentFragment, data: T, opts: U) => void
+export type ProcessingFunction<T, U extends object = object> = (frag: DocumentFragment, data: T, opts: U) => void
 /**
  * Asynchronous {@link ProcessingFunction}.
  * @param   <T> the type of the `data` parameter
@@ -27,7 +27,7 @@ export type ProcessingFunction<T, U extends object> = (this: any, frag: Document
  * @param   data the data to fill the template upon rendering
  * @param   options additional processing options
  */
-export type ProcessingFunctionAsync<T, U extends object> = (this: any, frag: DocumentFragment, data: T, opts: U) => Promise<void>
+export type ProcessingFunctionAsync<T, U extends object = object> = (frag: DocumentFragment, data: T, opts: U) => Promise<void>
 
 
 /**
@@ -48,7 +48,7 @@ export default class Processor<T, U extends object = object> {
 	 * @param   this_arg     the `this` context, if any, in which the instructions is called
 	 * @returns the processed document fragment (modified)
 	 */
-	static process<V, W extends object>(frag: DocumentFragment, instructions: ProcessingFunction<V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): DocumentFragment {
+	static process<V, W extends object = object>(frag: DocumentFragment, instructions: ProcessingFunction<V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): DocumentFragment {
 		instructions.call(this_arg, frag, data, options)
 		return frag
 	}
@@ -63,7 +63,7 @@ export default class Processor<T, U extends object = object> {
 	 * @param   this_arg     the `this` context, if any, in which the instructions is called
 	 * @returns the processed document fragment (modified)
 	 */
-	static async processAsync<V, W extends object>(frag: DocumentFragment, instructions: ProcessingFunctionAsync<V, W>, data: V|Promise<V>, options: W|Promise<W> = ({} as W), this_arg: unknown = null): Promise<DocumentFragment> {
+	static async processAsync<V, W extends object = object>(frag: DocumentFragment, instructions: ProcessingFunctionAsync<V, W>, data: V|Promise<V>, options: W|Promise<W> = ({} as W), this_arg: unknown = null): Promise<DocumentFragment> {
 		await instructions.call(this_arg, frag, await data, await options)
 		return frag
 	}
@@ -116,7 +116,7 @@ export default class Processor<T, U extends object = object> {
 	 * @throws  {ReferenceError} if the given list does not contain a `<template>`
 	 * @throws  {TypeError}      if the `<template>` does not have valid children
 	 */
-	static populateList<V, W extends object>(list: HTMLElement, instructions: ProcessingFunction<V, W>, dataset: V[], options?: W, this_arg: unknown = null): void {
+	static populateList<V, W extends object = object>(list: HTMLElement, instructions: ProcessingFunction<V, W>, dataset: V[], options?: W, this_arg: unknown = null): void {
 		let template: HTMLTemplateElement|null = list.querySelector('template')
 		if (template === null) {
 			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
@@ -147,7 +147,7 @@ export default class Processor<T, U extends object = object> {
 	 * @throws  {ReferenceError} if the given list does not contain a `<template>`
 	 * @throws  {TypeError}      if the `<template>` does not have valid children
 	 */
-	static async populateListAsync<V, W extends object>(list: HTMLElement, instructions: ProcessingFunctionAsync<V, W>, dataset: V[]|Promise<V[]>, options?: W|Promise<W>, this_arg: unknown = null): Promise<void> {
+	static async populateListAsync<V, W extends object = object>(list: HTMLElement, instructions: ProcessingFunctionAsync<V, W>, dataset: V[]|Promise<V[]>, options?: W|Promise<W>, this_arg: unknown = null): Promise<void> {
 		let template: HTMLTemplateElement|null = list.querySelector('template')
 		if (template === null) {
 			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
