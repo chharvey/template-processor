@@ -82,7 +82,7 @@ export default class Processor<T, U extends object = object> {
 	 *
 	 * Example:
 	 * ```js
-	 * let { document } = new jsdom.JSDOM(`
+	 * const { document } = new jsdom.JSDOM(`
 	 * <ol>
 	 * 	<template>
 	 * 		<li>
@@ -91,16 +91,16 @@ export default class Processor<T, U extends object = object> {
 	 * 	</template>
 	 * </ol>
 	 * `).window
-	 * let dataset = [
+	 * const dataset = [
 	 * 	{ "url": "#0", "text": "Career Connections" },
 	 * 	{ "url": "#1", "text": "Getting Licensed & Certified" },
 	 * 	{ "url": "#2", "text": "Career resources" },
 	 * 	{ "url": "#3", "text": "Code of Ethics" }
 	 * ]
-	 * let options = {
+	 * const options = {
 	 * 	suffix: ' &rarr;'
 	 * }
-	 * Processor.populateList(document.querySelector('ol'), function (f, d, o) {
+	 * Processor.populateList(document.querySelector('ol'), (f, d, o) => {
 	 * 	f.querySelector('a').href        = d.url
 	 * 	f.querySelector('a').textContent = d.text + o.suffix
 	 * }, dataset, options)
@@ -117,7 +117,7 @@ export default class Processor<T, U extends object = object> {
 	 * @throws  {TypeError}      if the `<template>` does not have valid children
 	 */
 	static populateList<V, W extends object>(list: HTMLElement, instructions: ProcessingFunction<V, W>, dataset: V[], options?: W, this_arg: unknown = null): void {
-		let template: HTMLTemplateElement|null = list.querySelector('template')
+		const template: HTMLTemplateElement|null = list.querySelector('template')
 		if (template === null) {
 			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
 		}
@@ -132,7 +132,7 @@ export default class Processor<T, U extends object = object> {
 			'dl'    : ( tpl: HTMLTemplateElement) => checkDOM_dl(tpl),
 			default : (_tpl: HTMLTemplateElement) => {},
 		})(template)
-		let processor: Processor<V, W> = new Processor(template, instructions)
+		const processor: Processor<V, W> = new Processor(template, instructions)
 		list.append(...dataset.map((data) => processor.process(data, options, this_arg)))
 	}
 	/**
@@ -148,7 +148,7 @@ export default class Processor<T, U extends object = object> {
 	 * @throws  {TypeError}      if the `<template>` does not have valid children
 	 */
 	static async populateListAsync<V, W extends object>(list: HTMLElement, instructions: ProcessingFunctionAsync<V, W>, dataset: V[]|Promise<V[]>, options?: W|Promise<W>, this_arg: unknown = null): Promise<void> {
-		let template: HTMLTemplateElement|null = list.querySelector('template')
+		const template: HTMLTemplateElement|null = list.querySelector('template')
 		if (template === null) {
 			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
 		}
@@ -163,7 +163,7 @@ export default class Processor<T, U extends object = object> {
 			'dl'    : ( tpl: HTMLTemplateElement) => checkDOM_dl(tpl),
 			default : (_tpl: HTMLTemplateElement) => {},
 		})(template)
-		let processor: Processor<V, W> = new Processor(template, () => {}, instructions)
+		const processor: Processor<V, W> = new Processor(template, () => {}, instructions)
 		list.append(... await Promise.all((await dataset).map((data) => processor.processAsync(data, options, this_arg))))
 	}
 
@@ -206,7 +206,7 @@ export default class Processor<T, U extends object = object> {
 		if (this._INSTRUCTIONS_ASYNC !== null) {
 			console.info('An asynchronous instruction is available; did you mean to call `processAsync()`?')
 		}
-		let frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
+		const frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
 		return Processor.process(frag, this._INSTRUCTIONS, data, options, this_arg)
 	}
 	/**
@@ -223,7 +223,7 @@ export default class Processor<T, U extends object = object> {
 			console.warn('No asynchronous instructions found. Executing synchronous instructions instead…')
 			return this.process(await data, await options, this_arg)
 		}
-		let frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
+		const frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
 		return Processor.processAsync(frag, this._INSTRUCTIONS_ASYNC, data, options, this_arg)
 	}
 }
@@ -237,7 +237,7 @@ export default class Processor<T, U extends object = object> {
  * @throws  {TypeError} if the `<template>` has less than or more than 1 child element
  * @throws  {TypeError} if the `<template>` has the incorrect child element type
  */
-function checkDOM(tpl: HTMLTemplateElement, child_tagname: string): void {
+const checkDOM = (tpl: HTMLTemplateElement, child_tagname: string): void => {
 	if (tpl.content.children.length !== 1) {
 		throw new TypeError('The <template> must contain exactly 1 element.')
 	}
@@ -255,7 +255,7 @@ function checkDOM(tpl: HTMLTemplateElement, child_tagname: string): void {
  * @throws  {TypeError} if the `<template>` has less than 1 child element
  * @throws  {TypeError} if the `<template>` has the incorrect children element types
  */
-function checkDOM_dl(tpl: HTMLTemplateElement): void {
+const checkDOM_dl = (tpl: HTMLTemplateElement): void => {
 	if (tpl.content.children.length < 1) {
 		throw new TypeError('The <template> must contain at least 1 element.')
 	}
