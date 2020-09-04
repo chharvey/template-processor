@@ -217,7 +217,7 @@ API:
 
 	// Since a `Document` object is passed, the modified `Document` is returned.
 	// If a `DocumentFragment` object were passed, it would return that modified `DocumentFragment`.
-	let output = Processor.process(document, instructions, {
+	const output = Processor.process(document, instructions, {
 		url: 'https://www.example.com/',
 		text: 'an example',
 	}, { uppercase: true })
@@ -277,7 +277,7 @@ API:
 
 	// Since a `Document` object is passed, the modified `Document` is returned.
 	// If a `DocumentFragment` object were passed, it would return that modified `DocumentFragment`.
-	let output: Document = Processor.process(document, instructions, {
+	const output: Document = Processor.process(document, instructions, {
 		url: 'https://www.example.com/',
 		text: 'an example',
 	}, { uppercase: true })
@@ -293,11 +293,11 @@ API:
 	You can also pass in promises for the data and options.
 	Here’s where the promises will be awaited.
 	```ts
-	let data: Promise<DataType> = Promise.resolve({
+	const data: Promise<DataType> = Promise.resolve({
 		url: 'https://www.example.com/',
 		text: 'an example',
 	})
-	let opts: Promise<OptsType> = Promise.resolve({ uppercase: true })
+	const opts: Promise<OptsType> = Promise.resolve({ uppercase: true })
 	Processor.processAsync(document, instructionsAsync, data, opts).then((output) => {
 		return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
 	})
