@@ -12,8 +12,8 @@ import * as xjs from 'extrajs'
  * {@link Processor.process} or {@link Processor#process}.
  * Any return value of the function does nothing.
  *
- * @param   <T> the type of the `data` parameter
- * @param   <U> the type of the `options` object parameter
+ * @typeparam T  the type of the `data` parameter
+ * @typeparam U  the type of the `options` object parameter
  * @param   frag the template content to process
  * @param   data the data to fill the template when processing
  * @param   options additional processing options
@@ -21,8 +21,8 @@ import * as xjs from 'extrajs'
 export type ProcessingFunction<T, U extends object> = (this: any, frag: DocumentFragment, data: T, opts: U) => void
 /**
  * Asynchronous {@link ProcessingFunction}.
- * @param   <T> the type of the `data` parameter
- * @param   <U> the type of the `options` object parameter
+ * @typeparam T  the type of the `data` parameter
+ * @typeparam U  the type of the `options` object parameter
  * @param   frag the template content to process
  * @param   data the data to fill the template upon rendering
  * @param   options additional processing options
@@ -39,8 +39,8 @@ export default class Processor<T, U extends object = object> {
 	 *
 	 * This method is equivalent to {@link Processor#process}, but useful if you have
 	 * a document fragment but no `<template>` element to which it belongs.
-	 * @param   <V>          the type of the data to fill
-	 * @param   <W>          the type of the `options` object
+	 * @typeparam V          the type of the data to fill
+	 * @typeparam W          the type of the `options` object
 	 * @param   frag         the document fragment to process
 	 * @param   instructions the processing function to use, taking `frag` as an argument
 	 * @param   data         the data to fill
@@ -54,8 +54,8 @@ export default class Processor<T, U extends object = object> {
 	}
 	/**
 	 * Asynchronous {@link Processor.process}.
-	 * @param   <V>          the type of the data to fill
-	 * @param   <W>          the type of the `options` object
+	 * @typeparam V          the type of the data to fill
+	 * @typeparam W          the type of the `options` object
 	 * @param   frag         the document fragment to process
 	 * @param   instructions the processing function to use, taking `frag` as an argument
 	 * @param   data         the data to fill
@@ -106,8 +106,8 @@ export default class Processor<T, U extends object = object> {
 	 * }, dataset, options)
 	 * ```
 	 *
-	 * @param   <V>          the type of the data to fill
-	 * @param   <W>          the type of the `options` object
+	 * @typeparam V          the type of the data to fill
+	 * @typeparam W          the type of the `options` object
 	 * @param   list         the list containing a template to process
 	 * @param   instructions the processing function to use
 	 * @param   dataset      the data to populate the list
@@ -137,8 +137,8 @@ export default class Processor<T, U extends object = object> {
 	}
 	/**
 	 * Asynchronous {@link Processor.populateList}
-	 * @param   <V>          the type of the data to fill
-	 * @param   <W>          the type of the `options` object
+	 * @typeparam V          the type of the data to fill
+	 * @typeparam W          the type of the `options` object
 	 * @param   list         the list containing a template to process
 	 * @param   instructions the processing function to use
 	 * @param   dataset      the data to populate the list
@@ -195,8 +195,8 @@ export default class Processor<T, U extends object = object> {
 
 	/**
 	 * Process this component’s template with some data, and return the resulting fragment.
-	 * @param   <T>      the type of the data to fill
-	 * @param   <U>      the type of the `options` object
+	 * @typeparam T      the type of the data to fill
+	 * @typeparam U      the type of the `options` object
 	 * @param   data     the data to fill
 	 * @param   options  additional processing options
 	 * @param   this_arg the `this` context, if any, in which this object’s instructions is called
@@ -211,8 +211,8 @@ export default class Processor<T, U extends object = object> {
 	}
 	/**
 	 * Asynchronous {@link Processor#process}.
-	 * @param   <T>      the type of the data to fill
-	 * @param   <U>      the type of the `options` object
+	 * @typeparam T      the type of the data to fill
+	 * @typeparam U      the type of the `options` object
 	 * @param   data     the data to fill
 	 * @param   options  additional processing options
 	 * @param   this_arg the `this` context, if any, in which this object’s instructions is called
