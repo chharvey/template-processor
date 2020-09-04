@@ -29,6 +29,5 @@
     "typescript": "~3.3.3"
   },
   "dependencies": {
-    "extrajs": "^0.18.1"
   }
 }
