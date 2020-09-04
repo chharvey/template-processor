@@ -109,7 +109,7 @@ API:
 	type DataType = { url: string; text: string; }
 	type OptsType = { uppercase?: boolean; }
 
-	const template: HTMLTemplateElement = document.querySelector('template') !
+	const template: HTMLTemplateElement = document.querySelector('template')!
 	const instructions = (frag: DocumentFragment, data: DataType, opts: OptsType): void => {
 		frag.querySelector('a').href        = data.url
 		frag.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text

@@ -19,7 +19,7 @@ import * as xjs from 'extrajs'
  * @param   data the data to fill the content when processing
  * @param   opts additional processing options
  */
-export type ProcessingFunction<S extends Document|DocumentFragment, T, U extends object> = (this: any, frag: S, data: T, opts: U) => void
+export type ProcessingFunction<S extends Document | DocumentFragment, T, U extends object> = (this: any, frag: S, data: T, opts: U) => void
 /**
  * Asynchronous {@link ProcessingFunction}.
  * @typeparam S  the type of content to process
@@ -29,7 +29,7 @@ export type ProcessingFunction<S extends Document|DocumentFragment, T, U extends
  * @param   data the data to fill the content upon rendering
  * @param   opts additional processing options
  */
-export type ProcessingFunctionAsync<S extends Document|DocumentFragment, T, U extends object> = (this: any, frag: S, data: T, opts: U) => Promise<void>
+export type ProcessingFunctionAsync<S extends Document | DocumentFragment, T, U extends object> = (this: any, frag: S, data: T, opts: U) => Promise<void>
 
 
 /**
@@ -53,7 +53,13 @@ export default class Processor<T, U extends object = object> {
 	 * @param   this_arg     the `this` context, if any, in which the instructions is called
 	 * @returns the processed content (modified)
 	 */
-	static process<S extends Document|DocumentFragment, V, W extends object>(frag: S, instructions: ProcessingFunction<S, V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): S {
+	static process<S extends Document | DocumentFragment, V, W extends object>(
+		frag:         S,
+		instructions: ProcessingFunction<S, V, W>,
+		data:         V,
+		options:      W = ({} as W),
+		this_arg:     unknown = null,
+	): S {
 		instructions.call(this_arg, frag, data, options)
 		return frag
 	}
@@ -69,7 +75,13 @@ export default class Processor<T, U extends object = object> {
 	 * @param   this_arg     the `this` context, if any, in which the instructions is called
 	 * @returns the processed content (modified)
 	 */
-	static async processAsync<S extends Document|DocumentFragment, V, W extends object>(frag: S, instructions: ProcessingFunctionAsync<S, V, W>, data: V|Promise<V>, options: W|Promise<W> = ({} as W), this_arg: unknown = null): Promise<S> {
+	static async processAsync<S extends Document | DocumentFragment, V, W extends object>(
+		frag:         S,
+		instructions: ProcessingFunctionAsync<S, V, W>,
+		data:         V | Promise<V>,
+		options:      W | Promise<W> = ({} as W),
+		this_arg:     unknown = null,
+	): Promise<S> {
 		await instructions.call(this_arg, frag, await data, await options)
 		return frag
 	}
@@ -122,10 +134,16 @@ export default class Processor<T, U extends object = object> {
 	 * @throws  {ReferenceError} if the given list does not contain a `<template>`
 	 * @throws  {TypeError}      if the `<template>` does not have valid children
 	 */
-	static populateList<V, W extends object>(list: HTMLElement, instructions: ProcessingFunction<DocumentFragment, V, W>, dataset: V[], options?: W, this_arg: unknown = null): void {
-		const template: HTMLTemplateElement|null = list.querySelector('template')
+	static populateList<V, W extends object>(
+		list:         HTMLElement,
+		instructions: ProcessingFunction<DocumentFragment, V, W>,
+		dataset:      V[],
+		options?:     W,
+		this_arg:     unknown = null,
+	): void {
+		const template: HTMLTemplateElement | null = list.querySelector('template')
 		if (template === null) {
-			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
+			throw new ReferenceError(`This <${ list.tagName.toLowerCase() }> does not have a <template> descendant.`)
 		}
 		xjs.Object.switch<void>(list.tagName.toLowerCase(), {
 			'ol'    : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'li'   ),
@@ -153,10 +171,16 @@ export default class Processor<T, U extends object = object> {
 	 * @throws  {ReferenceError} if the given list does not contain a `<template>`
 	 * @throws  {TypeError}      if the `<template>` does not have valid children
 	 */
-	static async populateListAsync<V, W extends object>(list: HTMLElement, instructions: ProcessingFunctionAsync<DocumentFragment, V, W>, dataset: V[]|Promise<V[]>, options?: W|Promise<W>, this_arg: unknown = null): Promise<void> {
-		const template: HTMLTemplateElement|null = list.querySelector('template')
+	static async populateListAsync<V, W extends object>(
+		list:         HTMLElement,
+		instructions: ProcessingFunctionAsync<DocumentFragment, V, W>,
+		dataset:      V[] | Promise<V[]>,
+		options?:     W | Promise<W>,
+		this_arg:     unknown = null,
+	): Promise<void> {
+		const template: HTMLTemplateElement | null = list.querySelector('template')
 		if (template === null) {
-			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
+			throw new ReferenceError(`This <${ list.tagName.toLowerCase() }> does not have a <template> descendant.`)
 		}
 		xjs.Object.switch<void>(list.tagName.toLowerCase(), {
 			'ol'    : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'li'   ),
@@ -170,7 +194,7 @@ export default class Processor<T, U extends object = object> {
 			default : (_tpl: HTMLTemplateElement) => {},
 		})(template)
 		const processor: Processor<V, W> = new Processor(template, () => {}, instructions)
-		list.append(... await Promise.all((await dataset).map((data) => processor.processAsync(data, options, this_arg))))
+		list.append(...await Promise.all((await dataset).map((data) => processor.processAsync(data, options, this_arg))))
 	}
 
 
@@ -185,7 +209,7 @@ export default class Processor<T, U extends object = object> {
 	/**
 	 * Asynchronous {@link Processor#_INSTRUCTIONS}.
 	 */
-	private readonly _INSTRUCTIONS_ASYNC: ProcessingFunctionAsync<DocumentFragment, T, U>|null;
+	private readonly _INSTRUCTIONS_ASYNC: ProcessingFunctionAsync<DocumentFragment, T, U> | null;
 
 	/**
 	 * Construct a new Processor object.
@@ -193,7 +217,11 @@ export default class Processor<T, U extends object = object> {
 	 * @param instructions       the processing function to use
 	 * @param instructions_async an alternative processing function, asynchronous
 	 */
-	constructor(template: HTMLTemplateElement, instructions: ProcessingFunction<DocumentFragment, T, U>, instructions_async: ProcessingFunctionAsync<DocumentFragment, T, U>|null = null) {
+	constructor (
+		template: HTMLTemplateElement,
+		instructions: ProcessingFunction<DocumentFragment, T, U>,
+		instructions_async: ProcessingFunctionAsync<DocumentFragment, T, U> | null = null,
+	) {
 		this._TEMPLATE           = template
 		this._INSTRUCTIONS       = instructions
 		this._INSTRUCTIONS_ASYNC = instructions_async
@@ -224,7 +252,7 @@ export default class Processor<T, U extends object = object> {
 	 * @param   this_arg the `this` context, if any, in which this object’s instructions is called
 	 * @returns the processed output
 	 */
-	async processAsync(data: T|Promise<T>, options?: U|Promise<U>, this_arg?: unknown): Promise<DocumentFragment> {
+	async processAsync(data: T | Promise<T>, options?: U | Promise<U>, this_arg?: unknown): Promise<DocumentFragment> {
 		if (this._INSTRUCTIONS_ASYNC === null) {
 			console.warn('No asynchronous instructions found. Executing synchronous instructions instead…')
 			return this.process(await data, await options, this_arg)
@@ -248,7 +276,7 @@ const checkDOM = (tpl: HTMLTemplateElement, child_tagname: string): void => {
 		throw new TypeError('The <template> must contain exactly 1 element.')
 	}
 	if (!tpl.content.children[0].matches(child_tagname)) {
-		throw new TypeError(`The <template> must contain exactly 1 <${child_tagname}>.`)
+		throw new TypeError(`The <template> must contain exactly 1 <${ child_tagname }>.`)
 	}
 }
 
@@ -263,7 +291,7 @@ const checkDOM = (tpl: HTMLTemplateElement, child_tagname: string): void => {
  */
 const checkDOM_dl = (tpl: HTMLTemplateElement): void => {
 	if (tpl.content.children.length < 1) {
-		throw new TypeError('The <template> must contain at least 1 element.')
+		throw new TypeError(`The <template> must contain at least 1 element.`)
 	}
 	if (tpl.content.querySelector('dt') === null || tpl.content.querySelector('dd') === null) {
 		throw new TypeError(`The <template> must contain at least 1 <dt> and at least 1 <dd>.`)
@@ -271,7 +299,7 @@ const checkDOM_dl = (tpl: HTMLTemplateElement): void => {
 	if ([...tpl.content.querySelectorAll('*')].some((el) => !el.matches('dt, dd'))) {
 		throw new TypeError(`The <template> must only contain <dt> or <dd> elements.`)
 	}
-	if ([...tpl.content.children].indexOf(tpl.content.querySelector('dt:last-of-type') !) >= [...tpl.content.children].indexOf(tpl.content.querySelector('dd:first-of-type') !)) {
+	if ([...tpl.content.children].indexOf(tpl.content.querySelector('dt:last-of-type')!) >= [...tpl.content.children].indexOf(tpl.content.querySelector('dd:first-of-type')!)) {
 		throw new TypeError(`All <dd> elements must follow all <dt> elements inside the <template>.`)
 	}
 }
