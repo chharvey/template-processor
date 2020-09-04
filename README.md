@@ -47,8 +47,8 @@ API:
 
 2. Get your own template & write your own instructions.
 	```js
-	let template = document.querySelector('template')
-	function instructions(frag, data, opts) {
+	const template = document.querySelector('template')
+	const instructions = (frag, data, opts) => {
 		frag.querySelector('a').href        = data.url
 		frag.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
 		if (data.url.slice(0,4) === 'http') {
@@ -59,7 +59,7 @@ API:
 	If your instructions uses I/O, you can write an asynchronous function.
 	Note that this function must not take promises as arguments.
 	```js
-	async function instructionsAsync(frag, data, opts) {
+	const instructionsAsync = async (frag, data, opts) => {
 		await doSomeAsyncStuff();
 	}
 	```
@@ -73,7 +73,7 @@ API:
 
 4. Process some data (synchronously or asynchronously).
 	```js
-	let snippet = my_processor.process({
+	const snippet = my_processor.process({
 		url: 'https://www.example.com/',
 		text: 'an example',
 	}, { uppercase: true })
@@ -109,8 +109,8 @@ API:
 	type DataType = { url: string; text: string; }
 	type OptsType = { uppercase?: boolean; }
 
-	let template: HTMLTemplateElement = document.querySelector('template') !
-	function instructions(frag: DocumentFragment, data: DataType, opts: OptsType): void {
+	const template: HTMLTemplateElement = document.querySelector('template') !
+	const instructions = (frag: DocumentFragment, data: DataType, opts: OptsType): void => {
 		frag.querySelector('a').href        = data.url
 		frag.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
 		if (data.url.slice(0,4) === 'http') {
@@ -121,7 +121,7 @@ API:
 	If your instructions uses I/O, you can write an asynchronous function.
 	Note that this function must not take promises as arguments.
 	```ts
-	async function instructionsAsync(frag: DocumentFragment, data: DataType, opts: OptsType): Promise<void> {
+	const instructionsAsync = async (frag: DocumentFragment, data: DataType, opts: OptsType): Promise<void> => {
 		await doSomeAsyncStuff();
 	}
 	```
@@ -135,7 +135,7 @@ API:
 
 4. Process some data (synchronously or asynchronously).
 	```ts
-	let snippet: DocumentFragment = my_processor.process({
+	const snippet: DocumentFragment = my_processor.process({
 		url: 'https://www.example.com/',
 		text: 'an example',
 	}, { uppercase: true })
@@ -151,11 +151,11 @@ API:
 	You can also pass in promises for the data and options.
 	Here’s where the promises will be awaited.
 	```ts
-	let data: Promise<DataType> = Promise.resolve({
+	const data: Promise<DataType> = Promise.resolve({
 		url: 'https://www.example.com/',
 		text: 'an example',
 	})
-	let opts: Promise<OptsType> = Promise.resolve({ uppercase: true })
+	const opts: Promise<OptsType> = Promise.resolve({ uppercase: true })
 	my_processor.processAsync(data, opts).then((snippet) => {
 		document.body.append(snippet)
 	})
@@ -202,7 +202,7 @@ const document = createDocument`
 
 Synchronously:
 ```js
-let processor = new Processor(document.querySelector('ul > template'), (frag, data, opts) => {
+const processor = new Processor(document.querySelector('ul > template'), (frag, data, opts) => {
 	frag.querySelector('a.c-LinkList__Link').href        = data.url
 	frag.querySelector('i'                 ).className   = `icon icon-${data.name}`
 	frag.querySelector('slot[name="text"]' ).textContent = data.text
@@ -213,7 +213,7 @@ document.querySelector('ul').append(...dataset.map((data) => processor.process(d
 
 Asynchronously:
 ```js
-let processor = new Processor(document.querySelector('ul > template'), () => {}, async (frag, data, opts) => {
+const processor = new Processor(document.querySelector('ul > template'), () => {}, async (frag, data, opts) => {
 	await doSomeAsyncStuff();
 	frag.querySelector('a.c-LinkList__Link').href        = data.url
 	frag.querySelector('i'                 ).className   = `icon icon-${data.name}`
