@@ -12,9 +12,9 @@ import * as xjs from 'extrajs'
  * {@link Processor.process} or {@link Processor#process}.
  * Any return value of the function does nothing.
  *
- * @param   <S> the type of content to process
- * @param   <T> the type of the data to fill when processing
- * @param   <U> the type of the processing options object
+ * @typeparam S  the type of content to process
+ * @typeparam T  the type of the data to fill when processing
+ * @typeparam U  the type of the processing options object
  * @param   frag the document or document fragment to process
  * @param   data the data to fill the content when processing
  * @param   opts additional processing options
@@ -22,12 +22,12 @@ import * as xjs from 'extrajs'
 export type ProcessingFunction<S extends Document|DocumentFragment, T, U extends object> = (this: any, frag: S, data: T, opts: U) => void
 /**
  * Asynchronous {@link ProcessingFunction}.
- * @param   <S> the type of content to process
- * @param   <T> the type of the data to fill when processing
- * @param   <U> the type of the processing options object
+ * @typeparam S  the type of content to process
+ * @typeparam T  the type of the data to fill when processing
+ * @typeparam U  the type of the processing options object
  * @param   frag the document or document fragment to process
  * @param   data the data to fill the content upon rendering
- * @param   options additional processing options
+ * @param   opts additional processing options
  */
 export type ProcessingFunctionAsync<S extends Document|DocumentFragment, T, U extends object> = (this: any, frag: S, data: T, opts: U) => Promise<void>
 
@@ -43,9 +43,9 @@ export default class Processor<T, U extends object = object> {
 	 *
 	 * This method is equivalent to {@link Processor#process}, but useful if you have
 	 * a whole document, or a document fragment but no `<template>` element to which it belongs.
-	 * @param   <S>          the type of content to process
-	 * @param   <V>          the type of the data to fill when processing
-	 * @param   <W>          the type of the processing options object
+	 * @typeparam S          the type of content to process
+	 * @typeparam V          the type of the data to fill when processing
+	 * @typeparam W          the type of the processing options object
 	 * @param   frag         the document or document fragment to process
 	 * @param   instructions the processing function to use, taking `frag` as an argument
 	 * @param   data         the data to fill the content when processing
@@ -59,9 +59,9 @@ export default class Processor<T, U extends object = object> {
 	}
 	/**
 	 * Asynchronous {@link Processor.process}.
-	 * @param   <S>          the type of content to process
-	 * @param   <V>          the type of the data to fill when processing
-	 * @param   <W>          the type of the processing options object
+	 * @typeparam S          the type of content to process
+	 * @typeparam V          the type of the data to fill when processing
+	 * @typeparam W          the type of the processing options object
 	 * @param   frag         the document or document fragment to process
 	 * @param   instructions the processing function to use, taking `frag` as an argument
 	 * @param   data         the data to fill the content when processing
@@ -88,7 +88,7 @@ export default class Processor<T, U extends object = object> {
 	 *
 	 * Example:
 	 * ```js
-	 * let { document } = new jsdom.JSDOM(`
+	 * const { document } = new jsdom.JSDOM(`
 	 * <ol>
 	 * 	<template>
 	 * 		<li>
@@ -97,23 +97,23 @@ export default class Processor<T, U extends object = object> {
 	 * 	</template>
 	 * </ol>
 	 * `).window
-	 * let dataset = [
+	 * const dataset = [
 	 * 	{ "url": "#0", "text": "Career Connections" },
 	 * 	{ "url": "#1", "text": "Getting Licensed & Certified" },
 	 * 	{ "url": "#2", "text": "Career resources" },
 	 * 	{ "url": "#3", "text": "Code of Ethics" }
 	 * ]
-	 * let options = {
+	 * const options = {
 	 * 	suffix: ' &rarr;'
 	 * }
-	 * Processor.populateList(document.querySelector('ol'), function (f, d, o) {
+	 * Processor.populateList(document.querySelector('ol'), (f, d, o) => {
 	 * 	f.querySelector('a').href        = d.url
 	 * 	f.querySelector('a').textContent = d.text + o.suffix
 	 * }, dataset, options)
 	 * ```
 	 *
-	 * @param   <V>          the type of the data to fill
-	 * @param   <W>          the type of the `options` object
+	 * @typeparam V          the type of the data to fill
+	 * @typeparam W          the type of the `options` object
 	 * @param   list         the list containing a template to process
 	 * @param   instructions the processing function to use
 	 * @param   dataset      the data to populate the list
@@ -123,7 +123,7 @@ export default class Processor<T, U extends object = object> {
 	 * @throws  {TypeError}      if the `<template>` does not have valid children
 	 */
 	static populateList<V, W extends object>(list: HTMLElement, instructions: ProcessingFunction<DocumentFragment, V, W>, dataset: V[], options?: W, this_arg: unknown = null): void {
-		let template: HTMLTemplateElement|null = list.querySelector('template')
+		const template: HTMLTemplateElement|null = list.querySelector('template')
 		if (template === null) {
 			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
 		}
@@ -138,13 +138,13 @@ export default class Processor<T, U extends object = object> {
 			'dl'    : ( tpl: HTMLTemplateElement) => checkDOM_dl(tpl),
 			default : (_tpl: HTMLTemplateElement) => {},
 		})(template)
-		let processor: Processor<V, W> = new Processor(template, instructions)
+		const processor: Processor<V, W> = new Processor(template, instructions)
 		list.append(...dataset.map((data) => processor.process(data, options, this_arg)))
 	}
 	/**
 	 * Asynchronous {@link Processor.populateList}
-	 * @param   <V>          the type of the data to fill
-	 * @param   <W>          the type of the `options` object
+	 * @typeparam V          the type of the data to fill
+	 * @typeparam W          the type of the `options` object
 	 * @param   list         the list containing a template to process
 	 * @param   instructions the processing function to use
 	 * @param   dataset      the data to populate the list
@@ -154,7 +154,7 @@ export default class Processor<T, U extends object = object> {
 	 * @throws  {TypeError}      if the `<template>` does not have valid children
 	 */
 	static async populateListAsync<V, W extends object>(list: HTMLElement, instructions: ProcessingFunctionAsync<DocumentFragment, V, W>, dataset: V[]|Promise<V[]>, options?: W|Promise<W>, this_arg: unknown = null): Promise<void> {
-		let template: HTMLTemplateElement|null = list.querySelector('template')
+		const template: HTMLTemplateElement|null = list.querySelector('template')
 		if (template === null) {
 			throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
 		}
@@ -169,7 +169,7 @@ export default class Processor<T, U extends object = object> {
 			'dl'    : ( tpl: HTMLTemplateElement) => checkDOM_dl(tpl),
 			default : (_tpl: HTMLTemplateElement) => {},
 		})(template)
-		let processor: Processor<V, W> = new Processor(template, () => {}, instructions)
+		const processor: Processor<V, W> = new Processor(template, () => {}, instructions)
 		list.append(... await Promise.all((await dataset).map((data) => processor.processAsync(data, options, this_arg))))
 	}
 
@@ -201,6 +201,8 @@ export default class Processor<T, U extends object = object> {
 
 	/**
 	 * Process this component’s template with some data, and return the resulting fragment.
+	 * @typeparam T      the type of the data to fill
+	 * @typeparam U      the type of the `options` object
 	 * @param   data     the data to fill the content when processing
 	 * @param   options  additional processing options
 	 * @param   this_arg the `this` context, if any, in which this object’s instructions is called
@@ -210,11 +212,13 @@ export default class Processor<T, U extends object = object> {
 		if (this._INSTRUCTIONS_ASYNC !== null) {
 			console.info('An asynchronous instruction is available; did you mean to call `processAsync()`?')
 		}
-		let frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
+		const frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
 		return Processor.process(frag, this._INSTRUCTIONS, data, options, this_arg)
 	}
 	/**
 	 * Asynchronous {@link Processor#process}.
+	 * @typeparam T      the type of the data to fill
+	 * @typeparam U      the type of the `options` object
 	 * @param   data     the data to fill the content when processing
 	 * @param   options  additional processing options
 	 * @param   this_arg the `this` context, if any, in which this object’s instructions is called
@@ -225,7 +229,7 @@ export default class Processor<T, U extends object = object> {
 			console.warn('No asynchronous instructions found. Executing synchronous instructions instead…')
 			return this.process(await data, await options, this_arg)
 		}
-		let frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
+		const frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
 		return Processor.processAsync(frag, this._INSTRUCTIONS_ASYNC, data, options, this_arg)
 	}
 }
@@ -239,7 +243,7 @@ export default class Processor<T, U extends object = object> {
  * @throws  {TypeError} if the `<template>` has less than or more than 1 child element
  * @throws  {TypeError} if the `<template>` has the incorrect child element type
  */
-function checkDOM(tpl: HTMLTemplateElement, child_tagname: string): void {
+const checkDOM = (tpl: HTMLTemplateElement, child_tagname: string): void => {
 	if (tpl.content.children.length !== 1) {
 		throw new TypeError('The <template> must contain exactly 1 element.')
 	}
@@ -257,7 +261,7 @@ function checkDOM(tpl: HTMLTemplateElement, child_tagname: string): void {
  * @throws  {TypeError} if the `<template>` has less than 1 child element
  * @throws  {TypeError} if the `<template>` has the incorrect children element types
  */
-function checkDOM_dl(tpl: HTMLTemplateElement): void {
+const checkDOM_dl = (tpl: HTMLTemplateElement): void => {
 	if (tpl.content.children.length < 1) {
 		throw new TypeError('The <template> must contain at least 1 element.')
 	}
