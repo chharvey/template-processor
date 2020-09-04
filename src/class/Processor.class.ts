@@ -31,8 +31,8 @@ export type ProcessingFunctionAsync<S extends Document | DocumentFragment, T, U 
 
 /**
  * A Processor stores processing operations for a template and a processing function.
- * @param   <T> the type of the data to fill when processing
- * @param   <U> the type of the processing options object
+ * @typeparam T the type of the data to fill when processing
+ * @typeparam U the type of the processing options object
  */
 export default class Processor<T, U extends object = object> {
 	/**
