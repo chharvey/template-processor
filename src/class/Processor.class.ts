@@ -1,6 +1,3 @@
-import * as xjs from 'extrajs'
-
-
 /**
  * A processing function specifies how to transform a template into markup.
  *
@@ -145,17 +142,16 @@ export default class Processor<T, U extends object = object> {
 		if (template === null) {
 			throw new ReferenceError(`This <${ list.tagName.toLowerCase() }> does not have a <template> descendant.`)
 		}
-		xjs.Object.switch<void>(list.tagName.toLowerCase(), {
-			'ol'    : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'li'   ),
-			'ul'    : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'li'   ),
-			'table' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tbody'),
-			'thead' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tr'   ),
-			'tbody' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tr'   ),
-			'tfoot' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tr'   ),
-			'tr'    : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'td'   ),
-			'dl'    : ( tpl: HTMLTemplateElement) => checkDOM_dl(tpl),
-			default : (_tpl: HTMLTemplateElement) => {},
-		})(template)
+		;(new Map([
+			['ol',    (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'li')],
+			['ul',    (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'li')],
+			['table', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tbody')],
+			['thead', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tr')],
+			['tbody', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tr')],
+			['tfoot', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tr')],
+			['tr',    (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'td')],
+			['dl',    (tpl: HTMLTemplateElement): void => checkDOM_dl(tpl)],
+		]).get(list.tagName.toLowerCase()) || ((_tpl: HTMLTemplateElement): void => {}))(template)
 		const processor: Processor<V, W> = new Processor(template, instructions)
 		list.append(...dataset.map((data) => processor.process(data, options, this_arg)))
 	}
@@ -182,17 +178,16 @@ export default class Processor<T, U extends object = object> {
 		if (template === null) {
 			throw new ReferenceError(`This <${ list.tagName.toLowerCase() }> does not have a <template> descendant.`)
 		}
-		xjs.Object.switch<void>(list.tagName.toLowerCase(), {
-			'ol'    : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'li'   ),
-			'ul'    : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'li'   ),
-			'table' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tbody'),
-			'thead' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tr'   ),
-			'tbody' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tr'   ),
-			'tfoot' : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'tr'   ),
-			'tr'    : ( tpl: HTMLTemplateElement) => checkDOM(tpl, 'td'   ),
-			'dl'    : ( tpl: HTMLTemplateElement) => checkDOM_dl(tpl),
-			default : (_tpl: HTMLTemplateElement) => {},
-		})(template)
+		;(new Map([
+			['ol',    (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'li')],
+			['ul',    (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'li')],
+			['table', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tbody')],
+			['thead', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tr')],
+			['tbody', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tr')],
+			['tfoot', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tr')],
+			['tr',    (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'td')],
+			['dl',    (tpl: HTMLTemplateElement): void => checkDOM_dl(tpl)],
+		]).get(list.tagName.toLowerCase()) || ((_tpl: HTMLTemplateElement) => {}))(template)
 		const processor: Processor<V, W> = new Processor(template, () => {}, instructions)
 		list.append(...await Promise.all((await dataset).map((data) => processor.processAsync(data, options, this_arg))))
 	}
