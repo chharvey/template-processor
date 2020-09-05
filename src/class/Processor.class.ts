@@ -1,6 +1,3 @@
-import * as xjs from 'extrajs'
-
-
 /**
  * A processing function specifies how to transform a template into markup.
  *
@@ -217,32 +214,32 @@ export default class Processor<T, U extends object = object> {
  * @throws  {TypeError} if the `<template>` does not have valid children
  */
 function checkDOM(list: HTMLElement): HTMLTemplateElement {
-	const template: HTMLTemplateElement|null = list.querySelector('template')
+	const template: HTMLTemplateElement | null = list.querySelector('template')
 	if (template === null) {
-		throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
+		throw new ReferenceError(`This <${ list.tagName.toLowerCase() }> does not have a <template> descendant.`)
 	}
-	const child_tagname: string|null = new Map<string, string>([
-		['ol'   , 'li'   ],
-		['ul'   , 'li'   ],
+	const child_tagname: string | null = new Map<string, string>([
+		['ol',    'li'],
+		['ul',    'li'],
 		['table', 'tbody'],
-		['thead', 'tr'   ],
-		['tbody', 'tr'   ],
-		['tfoot', 'tr'   ],
-		['tr'   , 'td'   ],
-		['dl'   , 'dt-dd'],
+		['thead', 'tr'],
+		['tbody', 'tr'],
+		['tfoot', 'tr'],
+		['tr',    'td'],
+		['dl',    'dt-dd'],
 	]).get(list.tagName.toLowerCase()) || null
 	if (child_tagname === null) {
-		throw new TypeError(`<${list.tagName.toLowerCase()}> elements are not yet supported.`)
+		throw new TypeError(`<${ list.tagName.toLowerCase() }> elements are not yet supported.`)
 	} else if (child_tagname !== 'dt-dd') { // the element is a `ol/ul/table/thead/tfoot/tbody/tr`
 		if (template.content.children.length !== 1) {
-			throw new TypeError('The <template> must contain exactly 1 element.')
+			throw new TypeError(`The <template> must contain exactly 1 element.`)
 		}
 		if (!template.content.children[0].matches(child_tagname)) {
-			throw new TypeError(`The <template> must contain exactly 1 <${child_tagname}>.`)
+			throw new TypeError(`The <template> must contain exactly 1 <${ child_tagname }>.`)
 		}
 	} else { // the element is a `dl`
 		if (template.content.children.length < 2) {
-			throw new TypeError('The <template> must contain at least 2 elements.')
+			throw new TypeError(`The <template> must contain at least 2 elements.`)
 		}
 		if (template.content.querySelector('dt') === null || template.content.querySelector('dd') === null) {
 			throw new TypeError(`The <template> must contain at least 1 <dt> and at least 1 <dd>.`)
@@ -250,7 +247,10 @@ function checkDOM(list: HTMLElement): HTMLTemplateElement {
 		if ([...template.content.querySelectorAll('*')].some((el) => !el.matches('dt, dd'))) {
 			throw new TypeError(`The <template> must only contain <dt> or <dd> elements.`)
 		}
-		if ([...template.content.children].indexOf(template.content.querySelector('dt:last-of-type') !) >= [...template.content.children].indexOf(template.content.querySelector('dd:first-of-type') !)) {
+		if (
+			[...template.content.children].indexOf(template.content.querySelector('dt:last-of-type')!) >=
+			[...template.content.children].indexOf(template.content.querySelector('dd:first-of-type')!)
+		) {
 			throw new TypeError(`All <dd> elements must follow all <dt> elements inside the <template>.`)
 		}
 	}
