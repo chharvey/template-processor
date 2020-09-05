@@ -16,7 +16,7 @@
  * @param   data the data to fill the content when processing
  * @param   opts additional processing options
  */
-export type ProcessingFunction<S extends Document | DocumentFragment, T, U extends object> = (frag: S, data: T, opts: U) => void
+export type ProcessingFunction<S extends Document | DocumentFragment, T, U extends object = object> = (frag: S, data: T, opts: U) => void
 /**
  * Asynchronous {@link ProcessingFunction}.
  * @typeparam S  the type of content to process
@@ -26,7 +26,7 @@ export type ProcessingFunction<S extends Document | DocumentFragment, T, U exten
  * @param   data the data to fill the content upon rendering
  * @param   opts additional processing options
  */
-export type ProcessingFunctionAsync<S extends Document | DocumentFragment, T, U extends object> = (frag: S, data: T, opts: U) => Promise<void>
+export type ProcessingFunctionAsync<S extends Document | DocumentFragment, T, U extends object = object> = (frag: S, data: T, opts: U) => Promise<void>
 
 
 /**
@@ -49,7 +49,7 @@ export default class Processor<T, U extends object = object> {
 	 * @param   options      additional processing options
 	 * @returns the processed content (modified)
 	 */
-	static process<S extends Document | DocumentFragment, V, W extends object>(
+	static process<S extends Document | DocumentFragment, V, W extends object = object>(
 		frag:         S,
 		instructions: ProcessingFunction<S, V, W>,
 		data:         V,
@@ -69,7 +69,7 @@ export default class Processor<T, U extends object = object> {
 	 * @param   options      additional processing options
 	 * @returns the processed content (modified)
 	 */
-	static async processAsync<S extends Document | DocumentFragment, V, W extends object>(
+	static async processAsync<S extends Document | DocumentFragment, V, W extends object = object>(
 		frag:         S,
 		instructions: ProcessingFunctionAsync<S, V, W>,
 		data:         V | Promise<V>,
@@ -123,29 +123,14 @@ export default class Processor<T, U extends object = object> {
 	 * @param   instructions the processing function to use
 	 * @param   dataset      the data to populate the list
 	 * @param   options      additional processing options for all items
-	 * @throws  {ReferenceError} if the given list does not contain a `<template>`
-	 * @throws  {TypeError}      if the `<template>` does not have valid children
 	 */
-	static populateList<V, W extends object>(
+	static populateList<V, W extends object = object>(
 		list:         HTMLElement,
 		instructions: ProcessingFunction<DocumentFragment, V, W>,
 		dataset:      V[],
 		options?:     W,
 	): void {
-		const template: HTMLTemplateElement | null = list.querySelector('template')
-		if (template === null) {
-			throw new ReferenceError(`This <${ list.tagName.toLowerCase() }> does not have a <template> descendant.`)
-		}
-		;(new Map([
-			['ol',    (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'li')],
-			['ul',    (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'li')],
-			['table', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tbody')],
-			['thead', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tr')],
-			['tbody', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tr')],
-			['tfoot', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tr')],
-			['tr',    (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'td')],
-			['dl',    (tpl: HTMLTemplateElement): void => checkDOM_dl(tpl)],
-		]).get(list.tagName.toLowerCase()) || ((_tpl: HTMLTemplateElement): void => {}))(template)
+		const template: HTMLTemplateElement = checkDOM(list)
 		const processor: Processor<V, W> = new Processor(template, instructions)
 		list.append(...dataset.map((data) => processor.process(data, options)))
 	}
@@ -157,29 +142,14 @@ export default class Processor<T, U extends object = object> {
 	 * @param   instructions the processing function to use
 	 * @param   dataset      the data to populate the list
 	 * @param   options      additional processing options for all items
-	 * @throws  {ReferenceError} if the given list does not contain a `<template>`
-	 * @throws  {TypeError}      if the `<template>` does not have valid children
 	 */
-	static async populateListAsync<V, W extends object>(
+	static async populateListAsync<V, W extends object = object>(
 		list:         HTMLElement,
 		instructions: ProcessingFunctionAsync<DocumentFragment, V, W>,
 		dataset:      V[] | Promise<V[]>,
 		options?:     W | Promise<W>,
 	): Promise<void> {
-		const template: HTMLTemplateElement | null = list.querySelector('template')
-		if (template === null) {
-			throw new ReferenceError(`This <${ list.tagName.toLowerCase() }> does not have a <template> descendant.`)
-		}
-		;(new Map([
-			['ol',    (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'li')],
-			['ul',    (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'li')],
-			['table', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tbody')],
-			['thead', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tr')],
-			['tbody', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tr')],
-			['tfoot', (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'tr')],
-			['tr',    (tpl: HTMLTemplateElement): void => checkDOM(tpl, 'td')],
-			['dl',    (tpl: HTMLTemplateElement): void => checkDOM_dl(tpl)],
-		]).get(list.tagName.toLowerCase()) || ((_tpl: HTMLTemplateElement) => {}))(template)
+		const template: HTMLTemplateElement = checkDOM(list)
 		const processor: Processor<V, W> = new Processor(template, () => {}, instructions)
 		list.append(...await Promise.all((await dataset).map((data) => processor.processAsync(data, options))))
 	}
@@ -249,42 +219,61 @@ export default class Processor<T, U extends object = object> {
 
 
 /**
- * Check the proper DOM structure of a `<template>` element within a
- * `<ol>`, `<ul>`, `<table>`, `<thead/tfoot/tbody>`, or `<tr>` element.
- * @param   tpl           the `<template>` element within the list
- * @param   child_tagname the tagname of the child within the `<template>`
- * @throws  {TypeError} if the `<template>` has less than or more than 1 child element
- * @throws  {TypeError} if the `<template>` has the incorrect child element type
- */
-const checkDOM = (tpl: HTMLTemplateElement, child_tagname: string): void => {
-	if (tpl.content.children.length !== 1) {
-		throw new TypeError('The <template> must contain exactly 1 element.')
-	}
-	if (!tpl.content.children[0].matches(child_tagname)) {
-		throw new TypeError(`The <template> must contain exactly 1 <${ child_tagname }>.`)
-	}
-}
-
-/**
- * {@link checkDOM} for `<dl>` lists.
+ * Check the proper DOM structure of a `<template>` element within one of the following types of elements:
+ * - `<ol>`
+ * - `<ul>`
+ * - `<table>`
+ * - `<thead/tfoot/tbody>`
+ * - `<tr>`
+ * - `<dl>`
  *
- * Specifically, the `<template>` must contain at least 1 `<dt>` followed by at least 1 `<dd>`.
- * @param   tpl           the `<template>` element within the list
- * @param   child_tagname the tagname of the child within the `<template>`
- * @throws  {TypeError} if the `<template>` has less than 1 child element
- * @throws  {TypeError} if the `<template>` has the incorrect children element types
+ * For all types except `dl`, the `<template>` element must have exactly 1 child, which must be of a valid type.
+ *
+ * For `dl` elements, the `<template>` must have at least 2 children, at least 1 `dt` and 1 `dd`,
+ * and no other types of children, and all `dd` children must follow all `dt` children.
+ *
+ * @param   list : the list containing a template to validate
+ * @returns the template if it passes all the tests
+ * @throws  {ReferenceError} if the given list does not contain a `<template>`
+ * @throws  {TypeError} if the `<template>` does not have valid children
  */
-const checkDOM_dl = (tpl: HTMLTemplateElement): void => {
-	if (tpl.content.children.length < 1) {
-		throw new TypeError(`The <template> must contain at least 1 element.`)
+function checkDOM(list: HTMLElement): HTMLTemplateElement {
+	const template: HTMLTemplateElement|null = list.querySelector('template')
+	if (template === null) {
+		throw new ReferenceError(`This <${list.tagName.toLowerCase()}> does not have a <template> descendant.`)
 	}
-	if (tpl.content.querySelector('dt') === null || tpl.content.querySelector('dd') === null) {
-		throw new TypeError(`The <template> must contain at least 1 <dt> and at least 1 <dd>.`)
+	const child_tagname: string|null = new Map<string, string>([
+		['ol'   , 'li'   ],
+		['ul'   , 'li'   ],
+		['table', 'tbody'],
+		['thead', 'tr'   ],
+		['tbody', 'tr'   ],
+		['tfoot', 'tr'   ],
+		['tr'   , 'td'   ],
+		['dl'   , 'dt-dd'],
+	]).get(list.tagName.toLowerCase()) || null
+	if (child_tagname === null) {
+		throw new TypeError(`<${list.tagName.toLowerCase()}> elements are not yet supported.`)
+	} else if (child_tagname !== 'dt-dd') { // the element is a `ol/ul/table/thead/tfoot/tbody/tr`
+		if (template.content.children.length !== 1) {
+			throw new TypeError('The <template> must contain exactly 1 element.')
+		}
+		if (!template.content.children[0].matches(child_tagname)) {
+			throw new TypeError(`The <template> must contain exactly 1 <${child_tagname}>.`)
+		}
+	} else { // the element is a `dl`
+		if (template.content.children.length < 2) {
+			throw new TypeError('The <template> must contain at least 2 elements.')
+		}
+		if (template.content.querySelector('dt') === null || template.content.querySelector('dd') === null) {
+			throw new TypeError(`The <template> must contain at least 1 <dt> and at least 1 <dd>.`)
+		}
+		if ([...template.content.querySelectorAll('*')].some((el) => !el.matches('dt, dd'))) {
+			throw new TypeError(`The <template> must only contain <dt> or <dd> elements.`)
+		}
+		if ([...template.content.children].indexOf(template.content.querySelector('dt:last-of-type') !) >= [...template.content.children].indexOf(template.content.querySelector('dd:first-of-type') !)) {
+			throw new TypeError(`All <dd> elements must follow all <dt> elements inside the <template>.`)
+		}
 	}
-	if ([...tpl.content.querySelectorAll('*')].some((el) => !el.matches('dt, dd'))) {
-		throw new TypeError(`The <template> must only contain <dt> or <dd> elements.`)
-	}
-	if ([...tpl.content.children].indexOf(tpl.content.querySelector('dt:last-of-type')!) >= [...tpl.content.children].indexOf(tpl.content.querySelector('dd:first-of-type')!)) {
-		throw new TypeError(`All <dd> elements must follow all <dt> elements inside the <template>.`)
-	}
+	return template
 }
