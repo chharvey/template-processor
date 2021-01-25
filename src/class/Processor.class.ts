@@ -111,7 +111,7 @@ export default class Processor<T, U extends object = object> {
 	 * @param   options      additional processing options for all items
 	 * @param   this_arg     the `this` context, if any, in which the instructions is called
 	 */
-	static populateList<V, W extends object = object>(list: HTMLElement, instructions: ProcessingFunction<V, W>, dataset: V[], options?: W, this_arg: unknown = null): void {
+	static populateList<V, W extends object = object>(list: HTMLElement, instructions: ProcessingFunction<V, W>, dataset: ReadonlyArray<V>, options?: W, this_arg: unknown = null): void {
 		const template: HTMLTemplateElement = checkDOM(list)
 		const processor: Processor<V, W> = new Processor(template, instructions)
 		list.append(...dataset.map((data) => processor.process(data, options, this_arg)))
@@ -126,7 +126,7 @@ export default class Processor<T, U extends object = object> {
 	 * @param   options      additional processing options for all items
 	 * @param   this_arg     the `this` context, if any, in which the instructions is called
 	 */
-	static async populateListAsync<V, W extends object = object>(list: HTMLElement, instructions: ProcessingFunctionAsync<V, W>, dataset: V[]|Promise<V[]>, options?: W|Promise<W>, this_arg: unknown = null): Promise<void> {
+	static async populateListAsync<V, W extends object = object>(list: HTMLElement, instructions: ProcessingFunctionAsync<V, W>, dataset: ReadonlyArray<V> | Promise<ReadonlyArray<V>>, options?: W | Promise<W>, this_arg: unknown = null): Promise<void> {
 		const template: HTMLTemplateElement = checkDOM(list)
 		const processor: Processor<V, W> = new Processor(template, () => {}, instructions)
 		list.append(... await Promise.all((await dataset).map((data) => processor.processAsync(data, options, this_arg))))
