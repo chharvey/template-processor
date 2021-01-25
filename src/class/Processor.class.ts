@@ -130,9 +130,9 @@ export default class Processor<T, U extends object = object> {
 		dataset:      ReadonlyArray<V>,
 		options?:     W,
 	): void {
-		const template: HTMLTemplateElement = checkDOM(list)
-		const processor: Processor<V, W> = new Processor(template, instructions)
-		list.append(...dataset.map((data) => processor.process(data, options)))
+		return list.append(...dataset.map(
+			(data) => new Processor<V, W>(checkDOM(list), instructions).process(data, options)
+		));
 	}
 	/**
 	 * Asynchronous {@link Processor.populateList}
@@ -149,9 +149,9 @@ export default class Processor<T, U extends object = object> {
 		dataset:      ReadonlyArray<V> | Promise<ReadonlyArray<V>>,
 		options?:     W | Promise<W>,
 	): Promise<void> {
-		const template: HTMLTemplateElement = checkDOM(list)
-		const processor: Processor<V, W> = new Processor(template, () => {}, instructions)
-		list.append(...await Promise.all((await dataset).map((data) => processor.processAsync(data, options))))
+		return list.append(...await Promise.all((await dataset).map(
+			(data) => new Processor<V, W>(checkDOM(list), () => {}, instructions).processAsync(data, options)
+		)));
 	}
 
 
@@ -196,8 +196,12 @@ export default class Processor<T, U extends object = object> {
 		if (this._INSTRUCTIONS_ASYNC !== null) {
 			console.info('An asynchronous instruction is available; did you mean to call `processAsync()`?')
 		}
-		const frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
-		return Processor.process(frag, this._INSTRUCTIONS, data, options)
+		return Processor.process(
+			this._TEMPLATE.content.cloneNode(true) as DocumentFragment, // NB:LINK: https://dom.spec.whatwg.org/#dom-node-clonenode
+			this._INSTRUCTIONS,
+			data,
+			options,
+		);
 	}
 	/**
 	 * Asynchronous {@link Processor#process}.
@@ -212,8 +216,12 @@ export default class Processor<T, U extends object = object> {
 			console.warn('No asynchronous instructions found. Executing synchronous instructions instead…')
 			return this.process(await data, await options)
 		}
-		const frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
-		return Processor.processAsync(frag, this._INSTRUCTIONS_ASYNC, data, options)
+		return Processor.processAsync(
+			this._TEMPLATE.content.cloneNode(true) as DocumentFragment, // NB:LINK: https://dom.spec.whatwg.org/#dom-node-clonenode
+			this._INSTRUCTIONS_ASYNC,
+			data,
+			options,
+		);
 	}
 }
 
