@@ -127,7 +127,7 @@ export default class Processor<T, U extends object = object> {
 	static populateList<V, W extends object = object>(
 		list:         HTMLElement,
 		instructions: ProcessingFunction<DocumentFragment, V, W>,
-		dataset:      ReadonlyArray<V>,
+		dataset:      readonly V[],
 		options?:     W,
 	): void {
 		return list.append(...dataset.map(
@@ -146,7 +146,7 @@ export default class Processor<T, U extends object = object> {
 	static async populateListAsync<V, W extends object = object>(
 		list:         HTMLElement,
 		instructions: ProcessingFunctionAsync<DocumentFragment, V, W>,
-		dataset:      ReadonlyArray<V> | Promise<ReadonlyArray<V>>,
+		dataset:      readonly V[] | Promise<readonly V[]>,
 		options?:     W | Promise<W>,
 	): Promise<void> {
 		return list.append(...await Promise.all((await dataset).map(
