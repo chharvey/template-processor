@@ -42,24 +42,24 @@ API:
 
 1. Import the module.
 	```js
-	const { Processor } = require('template-processor')
+	const {Processor} = require('template-processor');
 	```
 
 2. Get your own template & write your own instructions.
 	```js
-	const template = document.querySelector('template')
-	const instructions = (frag, data, opts) => {
-		frag.querySelector('a').href        = data.url
-		frag.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
+	const template = document.querySelector('template');
+	function instructions(frag, data, opts) {
+		frag.querySelector('a').href        = data.url;
+		frag.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text;
 		if (data.url.slice(0,4) === 'http') {
-			frag.querySelector('a').setAttribute('rel', 'external')
-		}
+			frag.querySelector('a').setAttribute('rel', 'external');
+		};
 	}
 	```
 	If your instructions uses I/O, you can write an asynchronous function.
 	Note that this function must not take promises as arguments.
 	```js
-	const instructionsAsync = async (frag, data, opts) => {
+	async function instructionsAsync(frag, data, opts) {
 		await doSomeAsyncStuff();
 	}
 	```
@@ -67,8 +67,8 @@ API:
 3. Construct a new processor with the stuff you wrote
 	(optionally provide the async instructions).
 	```js
-	let my_processor = new Processor(template, instructions)
-	my_processor = new Processor(template, instructions, instructionsAsync)
+	let my_processor = new Processor(template, instructions);
+	my_processor = new Processor(template, instructions, instructionsAsync);
 	```
 
 4. Process some data (synchronously or asynchronously).
@@ -76,52 +76,54 @@ API:
 	const snippet = my_processor.process({
 		url: 'https://www.example.com/',
 		text: 'an example',
-	}, { uppercase: true })
-	document.body.append(snippet)
+	}, {uppercase: true});
+	document.body.append(snippet);
 
 	my_processor.processAsync({
 		url: 'https://www.example.com/',
 		text: 'an example',
-	}, { uppercase: true }).then((snippet) => {
-		document.body.append(snippet)
-	})
+	}, {uppercase: true}).then((snippet) => {
+		document.body.append(snippet);
+	});
 	```
 	You can also pass in promises for the data and options.
 	Here’s where the promises will be awaited.
 	```js
-	my_processor.processAsync(Promise.resolve({
+	const data = Promise.resolve({
 		url: 'https://www.example.com/',
 		text: 'an example',
-	}), Promise.resolve({ uppercase: true })).then((snippet) => {
-		document.body.append(snippet)
-	})
+	});
+	const opts = Promise.resolve({uppercase: true});
+	my_processor.processAsync(data, opts).then((snippet) => {
+		document.body.append(snippet);
+	});
 	```
 
 ### TypeScript
 
 1. Import the module.
 	```ts
-	import { Processor } from 'template-processor'
+	import {Processor} from 'template-processor';
 	```
 
 2. Get your own template & write your own instructions.
 	```ts
-	type DataType = { url: string; text: string; }
-	type OptsType = { uppercase?: boolean; }
+	type DataType = {url: string, text: string};
+	type OptsType = {uppercase?: boolean};
 
-	const template: HTMLTemplateElement = document.querySelector('template')!
-	const instructions = (frag: DocumentFragment, data: DataType, opts: OptsType): void => {
-		frag.querySelector('a').href        = data.url
-		frag.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
+	const template: HTMLTemplateElement = document.querySelector('template')!;
+	function instructions(frag: DocumentFragment, data: DataType, opts: OptsType): void {
+		frag.querySelector('a').href        = data.url;
+		frag.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text;
 		if (data.url.slice(0,4) === 'http') {
-			frag.querySelector('a').setAttribute('rel', 'external')
-		}
+			frag.querySelector('a').setAttribute('rel', 'external');
+		};
 	}
 	```
 	If your instructions uses I/O, you can write an asynchronous function.
 	Note that this function must not take promises as arguments.
 	```ts
-	const instructionsAsync = async (frag: DocumentFragment, data: DataType, opts: OptsType): Promise<void> => {
+	async function instructionsAsync(frag: DocumentFragment, data: DataType, opts: OptsType): Promise<void> {
 		await doSomeAsyncStuff();
 	}
 	```
@@ -130,7 +132,7 @@ API:
 	(optionally provide the async instructions).
 	```ts
 	let my_processor: Processor<DataType, OptsType> = new Processor(template, instructions)
-	my_processor = new Processor(template, instructions, instructionsAsync)
+	my_processor = new Processor(template, instructions, instructionsAsync);
 	```
 
 4. Process some data (synchronously or asynchronously).
@@ -138,15 +140,15 @@ API:
 	const snippet: DocumentFragment = my_processor.process({
 		url: 'https://www.example.com/',
 		text: 'an example',
-	}, { uppercase: true })
-	document.body.append(snippet)
+	}, {uppercase: true});
+	document.body.append(snippet);
 
 	my_processor.processAsync({
 		url: 'https://www.example.com/',
 		text: 'an example',
-	}, { uppercase: true }).then((snippet) => {
-		document.body.append(snippet)
-	})
+	}, {uppercase: true}).then((snippet) => {
+		document.body.append(snippet);
+	});
 	```
 	You can also pass in promises for the data and options.
 	Here’s where the promises will be awaited.
@@ -154,11 +156,11 @@ API:
 	const data: Promise<DataType> = Promise.resolve({
 		url: 'https://www.example.com/',
 		text: 'an example',
-	})
-	const opts: Promise<OptsType> = Promise.resolve({ uppercase: true })
+	});
+	const opts: Promise<OptsType> = Promise.resolve({uppercase: true});
 	my_processor.processAsync(data, opts).then((snippet) => {
-		document.body.append(snippet)
-	})
+		document.body.append(snippet);
+	});
 	```
 
 
@@ -188,18 +190,18 @@ API:
 
 1. Import the module.
 	```js
-	const { Processor } = require('template-processor')
+	const {Processor} = require('template-processor')
 	```
 
 2. Get your own template & write your own instructions.
 	```js
 	let document;
 	function instructions(doc, data, opts) {
-		doc.querySelector('a').href        = data.url
-		doc.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
+		doc.querySelector('a').href        = data.url;
+		doc.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text;
 		if (data.url.slice(0,4) === 'http') {
-			doc.querySelector('a').setAttribute('rel', 'external')
-		}
+			doc.querySelector('a').setAttribute('rel', 'external');
+		};
 	}
 	```
 	If your instructions uses I/O, you can write an asynchronous function.
@@ -212,32 +214,33 @@ API:
 
 3. Process some data (synchronously or asynchronously).
 	```js
-	const fs = require('fs')
-	const util = require('util')
+	const fs = require('fs');
 
 	// Since a `Document` object is passed, the modified `Document` is returned.
 	// If a `DocumentFragment` object were passed, it would return that modified `DocumentFragment`.
 	const output = Processor.process(document, instructions, {
 		url: 'https://www.example.com/',
 		text: 'an example',
-	}, { uppercase: true })
-	fs.writeFileSync('output.html', output.toString(), 'utf8')
+	}, {uppercase: true});
+	fs.writeFileSync('output.html', output.toString(), 'utf8');
 
 	Processor.processAsync(document, instructionsAsync, {
 		url: 'https://www.example.com/',
 		text: 'an example',
-	}, { uppercase: true }).then((output) => {
-		return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
+	}, {uppercase: true}).then((output) => {
+		return fs.promises.writeFile('output.html', output.toString(), 'utf8');
 	})
 	```
 	You can also pass in promises for the data and options.
 	Here’s where the promises will be awaited.
 	```js
-	Processor.processAsync(document, instructionsAsync, Promise.resolve({
+	const data = Promise.resolve({
 		url: 'https://www.example.com/',
 		text: 'an example',
-	}), Promise.resolve({ uppercase: true })).then((output) => {
-		return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
+	});
+	const opts = Promise.resolve({uppercase: true});
+	Processor.processAsync(document, instructionsAsync, data, opts).then((output) => {
+		return fs.promises.writeFile('output.html', output.toString(), 'utf8');
 	})
 	```
 
@@ -245,21 +248,21 @@ API:
 
 1. Import the module.
 	```ts
-	import { Processor } from 'template-processor'
+	import {Processor} from 'template-processor';
 	```
 
 2. Get your own template & write your own instructions.
 	```ts
-	type DataType = { url: string; text: string; }
-	type OptsType = { uppercase?: boolean; }
+	type DataType = {url: string, text: string};
+	type OptsType = {uppercase?: boolean};
 
 	let document: Document;
 	function instructions(doc: Document, data: DataType, opts: OptsType): void {
-		doc.querySelector('a').href        = data.url
-		doc.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text
+		doc.querySelector('a').href        = data.url;
+		doc.querySelector('a').textContent = (opts.uppercase) ? data.text.toUpperCase() : data.text;
 		if (data.url.slice(0,4) === 'http') {
-			doc.querySelector('a').setAttribute('rel', 'external')
-		}
+			doc.querySelector('a').setAttribute('rel', 'external');
+		};
 	}
 	```
 	If your instructions uses I/O, you can write an asynchronous function.
@@ -272,23 +275,22 @@ API:
 
 3. Process some data (synchronously or asynchronously).
 	```ts
-	import * as fs from 'fs'
-	import * as util from 'util'
+	import * as fs from 'fs';
 
 	// Since a `Document` object is passed, the modified `Document` is returned.
 	// If a `DocumentFragment` object were passed, it would return that modified `DocumentFragment`.
 	const output: Document = Processor.process(document, instructions, {
 		url: 'https://www.example.com/',
 		text: 'an example',
-	}, { uppercase: true })
-	fs.writeFileSync('output.html', output.toString(), 'utf8')
+	}, {uppercase: true});
+	fs.writeFileSync('output.html', output.toString(), 'utf8');
 
 	Processor.processAsync(document, instructionsAsync, {
 		url: 'https://www.example.com/',
 		text: 'an example',
-	}, { uppercase: true }).then((output) => {
-		return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
-	})
+	}, {uppercase: true}).then((output) => {
+		return fs.promises.writeFile('output.html', output.toString(), 'utf8');
+	});
 	```
 	You can also pass in promises for the data and options.
 	Here’s where the promises will be awaited.
@@ -296,11 +298,11 @@ API:
 	const data: Promise<DataType> = Promise.resolve({
 		url: 'https://www.example.com/',
 		text: 'an example',
-	})
-	const opts: Promise<OptsType> = Promise.resolve({ uppercase: true })
+	});
+	const opts: Promise<OptsType> = Promise.resolve({uppercase: true});
 	Processor.processAsync(document, instructionsAsync, data, opts).then((output) => {
-		return util.promisify(fs.writeFile)('output.html', output.toString(), 'utf8')
-	})
+		return fs.promises.writeFile('output.html', output.toString(), 'utf8');
+	});
 	```
 
 
@@ -310,18 +312,18 @@ The point is to have one template and one instruction, but tons of data.
 
 ```js
 let dataset = [
-	{ "name": "twitter" , "url": "//twitter.com/god"    , "text": "Follow God on Twitter"        },
-	{ "name": "google"  , "url": "//plus.google.com/god", "text": "Follow God on Google+"        },
-	{ "name": "facebook", "url": "//facebook.com/god"   , "text": "Like God on Facebook"         },
-	{ "name": "linkedin", "url": "//linkedin.com/god"   , "text": "Connect with God on LinkedIn" },
-	{ "name": "youtube" , "url": "//youtube.com/god"    , "text": "Watch God on YouTube"         },
+	{"name": "twitter",  "url": "//twitter.com/god",     "text": "Follow God on Twitter"},
+	{"name": "google",   "url": "//plus.google.com/god", "text": "Follow God on Google+" },
+	{"name": "facebook", "url": "//facebook.com/god",    "text": "Like God on Facebook"},
+	{"name": "linkedin", "url": "//linkedin.com/god",    "text": "Connect with God on LinkedIn"},
+	{"name": "youtube",  "url": "//youtube.com/god",     "text": "Watch God on YouTube"},
 	// even more and more
-]
+];
 // or it could be a promise:
 dataset = Promise.resolve([
-	{ "name": "twitter" , "url": "//twitter.com/god"    , "text": "Follow God on Twitter"        },
+	{"name": "twitter", "url": "//twitter.com/god", "text": "Follow God on Twitter"},
 	// even more and more
-])
+]);
 
 const document = createDocument`
 <html>
@@ -345,34 +347,35 @@ const document = createDocument`
 Synchronously:
 ```js
 const processor = new Processor(document.querySelector('ul > template'), (frag, data, opts) => {
-	frag.querySelector('a.c-LinkList__Link').href        = data.url
-	frag.querySelector('i'                 ).className   = `icon icon-${data.name}`
-	frag.querySelector('slot[name="text"]' ).textContent = data.text
-})
+	frag.querySelector('a.c-LinkList__Link').href        = data.url;
+	frag.querySelector('i'                 ).className   = `icon icon-${ data.name }`;
+	frag.querySelector('slot[name="text"]' ).textContent = data.text;
+});
 
-document.querySelector('ul').append(...dataset.map((data) => processor.process(data)))
+document.querySelector('ul').append(
+	...dataset.map((data) => processor.process(data))
+);
 ```
 
 Asynchronously:
 ```js
 const processor = new Processor(document.querySelector('ul > template'), () => {}, async (frag, data, opts) => {
 	await doSomeAsyncStuff();
-	frag.querySelector('a.c-LinkList__Link').href        = data.url
-	frag.querySelector('i'                 ).className   = `icon icon-${data.name}`
-	frag.querySelector('slot[name="text"]' ).textContent = data.text
-})
+	frag.querySelector('a.c-LinkList__Link').href        = data.url;
+	frag.querySelector('i')                 .className   = `icon icon-${ data.name }`;
+	frag.querySelector('slot[name="text"]') .textContent = data.text;
+});
 
 // with promises:
-dataset.then((datapoints) =>
-	Promise.all(datapoints.map((data) => processor.processAsync(data)))
-).then((frags) =>
-	document.querySelector('ul').append(...frags)
-)
+dataset
+	.then((datapoints) => Promise.all(datapoints.map((data) => processor.processAsync(data))))
+	.then((frags) => document.querySelector('ul').append(...frags))
+;
 
 // with await:
 document.querySelector('ul').append(
 	...await Promise.all((await dataset).map((data) => processor.processAsync(data)))
-)
+);
 ```
 
 Starting in v1.2, we can do the above much more efficiently with two new static methods:
@@ -382,18 +385,18 @@ They check for a `<template>` inside the list and ensure it has the correct mark
 Synchronously:
 ```js
 Processor.populateList(document.querySelector('ul'), (frag, data, opts) => {
-	frag.querySelector('a.c-LinkList__Link').href        = data.url
-	frag.querySelector('i'                 ).className   = `icon icon-${data.name}`
-	frag.querySelector('slot[name="text"]' ).textContent = data.text
-}, dataset)
+	frag.querySelector('a.c-LinkList__Link').href        = data.url;
+	frag.querySelector('i'                 ).className   = `icon icon-${ data.name }`;
+	frag.querySelector('slot[name="text"]' ).textContent = data.text;
+}, dataset);
 ```
 
 Asynchronously:
 ```js
 Processor.populateListAsync(document.querySelector('ul'), async (frag, data, opts) => {
 	await doSomeAsyncStuff();
-	frag.querySelector('a.c-LinkList__Link').href        = data.url
-	frag.querySelector('i'                 ).className   = `icon icon-${data.name}`
-	frag.querySelector('slot[name="text"]' ).textContent = data.text
-}, Promise.resolve(dataset))
+	frag.querySelector('a.c-LinkList__Link').href        = data.url;
+	frag.querySelector('i'                 ).className   = `icon icon-${ data.name }`;
+	frag.querySelector('slot[name="text"]' ).textContent = data.text;
+}, Promise.resolve(dataset));
 ```
