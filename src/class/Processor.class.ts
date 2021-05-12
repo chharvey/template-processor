@@ -1,7 +1,7 @@
 /**
  * A processing function specifies how to transform a template into markup.
  *
- * This function modifies a given document fragment, filling it in with given data.
+ * This function modifies a given document or document fragment, filling it in with given data.
  * Additionally it may use any rendering options passed.
  * It *should not* have a `this` context, and it *should not* have a return value.
  *
@@ -9,59 +9,73 @@
  * {@link Processor.process} or {@link Processor#process}.
  * Any return value of the function does nothing.
  *
- * @typeparam T  the type of the `data` parameter
- * @typeparam U  the type of the `options` object parameter
- * @param   frag the template content to process
- * @param   data the data to fill the template when processing
- * @param   options additional processing options
+ * @typeparam S  the type of content to process
+ * @typeparam T  the type of the data to fill when processing
+ * @typeparam U  the type of the processing options object
+ * @param   frag the document or document fragment to process
+ * @param   data the data to fill the content when processing
+ * @param   opts additional processing options
  */
-export type ProcessingFunction<T, U extends object = object> = (frag: DocumentFragment, data: T, opts: U) => void
+export type ProcessingFunction<S extends Document | DocumentFragment, T, U extends object = object> = (frag: S, data: T, opts: U) => void
 /**
  * Asynchronous {@link ProcessingFunction}.
- * @typeparam T  the type of the `data` parameter
- * @typeparam U  the type of the `options` object parameter
- * @param   frag the template content to process
- * @param   data the data to fill the template upon rendering
- * @param   options additional processing options
+ * @typeparam S  the type of content to process
+ * @typeparam T  the type of the data to fill when processing
+ * @typeparam U  the type of the processing options object
+ * @param   frag the document or document fragment to process
+ * @param   data the data to fill the content upon rendering
+ * @param   opts additional processing options
  */
-export type ProcessingFunctionAsync<T, U extends object = object> = (frag: DocumentFragment, data: T, opts: U) => Promise<void>
+export type ProcessingFunctionAsync<S extends Document | DocumentFragment, T, U extends object = object> = (frag: S, data: T, opts: U) => Promise<void>
 
 
 /**
  * A Processor stores processing operations for a template and a processing function.
+ * @typeparam T the type of the data to fill when processing
+ * @typeparam U the type of the processing options object
  */
 export default class Processor<T, U extends object = object> {
 	/**
-	 * Process a document fragment with some data, and return the same fragment, modified.
+	 * Process a document or document fragment with some data, and return the same content, modified.
 	 *
 	 * This method is equivalent to {@link Processor#process}, but useful if you have
-	 * a document fragment but no `<template>` element to which it belongs.
-	 * @typeparam V          the type of the data to fill
-	 * @typeparam W          the type of the `options` object
-	 * @param   frag         the document fragment to process
+	 * a whole document, or a document fragment but no `<template>` element to which it belongs.
+	 * @typeparam S          the type of content to process
+	 * @typeparam V          the type of the data to fill when processing
+	 * @typeparam W          the type of the processing options object
+	 * @param   frag         the document or document fragment to process
 	 * @param   instructions the processing function to use, taking `frag` as an argument
-	 * @param   data         the data to fill
+	 * @param   data         the data to fill the content when processing
 	 * @param   options      additional processing options
-	 * @param   this_arg     the `this` context, if any, in which the instructions is called
-	 * @returns the processed document fragment (modified)
+	 * @returns the processed content (modified)
 	 */
-	static process<V, W extends object = object>(frag: DocumentFragment, instructions: ProcessingFunction<V, W>, data: V, options: W = ({} as W), this_arg: unknown = null): DocumentFragment {
-		instructions.call(this_arg, frag, data, options)
+	static process<S extends Document | DocumentFragment, V, W extends object = object>(
+		frag:         S,
+		instructions: ProcessingFunction<S, V, W>,
+		data:         V,
+		options:      W = ({} as W),
+	): S {
+		instructions(frag, data, options)
 		return frag
 	}
 	/**
 	 * Asynchronous {@link Processor.process}.
-	 * @typeparam V          the type of the data to fill
-	 * @typeparam W          the type of the `options` object
-	 * @param   frag         the document fragment to process
+	 * @typeparam S          the type of content to process
+	 * @typeparam V          the type of the data to fill when processing
+	 * @typeparam W          the type of the processing options object
+	 * @param   frag         the document or document fragment to process
 	 * @param   instructions the processing function to use, taking `frag` as an argument
-	 * @param   data         the data to fill
+	 * @param   data         the data to fill the content when processing
 	 * @param   options      additional processing options
-	 * @param   this_arg     the `this` context, if any, in which the instructions is called
-	 * @returns the processed document fragment (modified)
+	 * @returns the processed content (modified)
 	 */
-	static async processAsync<V, W extends object = object>(frag: DocumentFragment, instructions: ProcessingFunctionAsync<V, W>, data: V|Promise<V>, options: W|Promise<W> = ({} as W), this_arg: unknown = null): Promise<DocumentFragment> {
-		await instructions.call(this_arg, frag, await data, await options)
+	static async processAsync<S extends Document | DocumentFragment, V, W extends object = object>(
+		frag:         S,
+		instructions: ProcessingFunctionAsync<S, V, W>,
+		data:         V | Promise<V>,
+		options:      W | Promise<W> = ({} as W),
+	): Promise<S> {
+		await instructions(frag, await data, await options)
 		return frag
 	}
 
@@ -109,12 +123,16 @@ export default class Processor<T, U extends object = object> {
 	 * @param   instructions the processing function to use
 	 * @param   dataset      the data to populate the list
 	 * @param   options      additional processing options for all items
-	 * @param   this_arg     the `this` context, if any, in which the instructions is called
 	 */
-	static populateList<V, W extends object = object>(list: HTMLElement, instructions: ProcessingFunction<V, W>, dataset: ReadonlyArray<V>, options?: W, this_arg: unknown = null): void {
-		const template: HTMLTemplateElement = checkDOM(list)
-		const processor: Processor<V, W> = new Processor(template, instructions)
-		list.append(...dataset.map((data) => processor.process(data, options, this_arg)))
+	static populateList<V, W extends object = object>(
+		list:         HTMLElement,
+		instructions: ProcessingFunction<DocumentFragment, V, W>,
+		dataset:      readonly V[],
+		options?:     W,
+	): void {
+		return list.append(...dataset.map(
+			(data) => new Processor<V, W>(checkDOM(list), instructions).process(data, options)
+		));
 	}
 	/**
 	 * Asynchronous {@link Processor.populateList}
@@ -124,12 +142,16 @@ export default class Processor<T, U extends object = object> {
 	 * @param   instructions the processing function to use
 	 * @param   dataset      the data to populate the list
 	 * @param   options      additional processing options for all items
-	 * @param   this_arg     the `this` context, if any, in which the instructions is called
 	 */
-	static async populateListAsync<V, W extends object = object>(list: HTMLElement, instructions: ProcessingFunctionAsync<V, W>, dataset: ReadonlyArray<V> | Promise<ReadonlyArray<V>>, options?: W | Promise<W>, this_arg: unknown = null): Promise<void> {
-		const template: HTMLTemplateElement = checkDOM(list)
-		const processor: Processor<V, W> = new Processor(template, () => {}, instructions)
-		list.append(... await Promise.all((await dataset).map((data) => processor.processAsync(data, options, this_arg))))
+	static async populateListAsync<V, W extends object = object>(
+		list:         HTMLElement,
+		instructions: ProcessingFunctionAsync<DocumentFragment, V, W>,
+		dataset:      readonly V[] | Promise<readonly V[]>,
+		options?:     W | Promise<W>,
+	): Promise<void> {
+		return list.append(...await Promise.all((await dataset).map(
+			(data) => new Processor<V, W>(checkDOM(list), () => {}, instructions).processAsync(data, options)
+		)));
 	}
 
 
@@ -140,11 +162,11 @@ export default class Processor<T, U extends object = object> {
 	/**
 	 * This object’s processing function, which contains instructions for processing the template.
 	 */
-	private readonly _INSTRUCTIONS: ProcessingFunction<T, U>;
+	private readonly _INSTRUCTIONS: ProcessingFunction<DocumentFragment, T, U>;
 	/**
-	 * Asynchronous {@link Processor._INSTRUCTIONS}.
+	 * Asynchronous {@link Processor#_INSTRUCTIONS}.
 	 */
-	private readonly _INSTRUCTIONS_ASYNC: ProcessingFunctionAsync<T, U>|null;
+	private readonly _INSTRUCTIONS_ASYNC: ProcessingFunctionAsync<DocumentFragment, T, U> | null;
 
 	/**
 	 * Construct a new Processor object.
@@ -152,7 +174,11 @@ export default class Processor<T, U extends object = object> {
 	 * @param instructions       the processing function to use
 	 * @param instructions_async an alternative processing function, asynchronous
 	 */
-	constructor(template: HTMLTemplateElement, instructions: ProcessingFunction<T, U>, instructions_async: ProcessingFunctionAsync<T, U>|null = null) {
+	constructor (
+		template: HTMLTemplateElement,
+		instructions: ProcessingFunction<DocumentFragment, T, U>,
+		instructions_async: ProcessingFunctionAsync<DocumentFragment, T, U> | null = null,
+	) {
 		this._TEMPLATE           = template
 		this._INSTRUCTIONS       = instructions
 		this._INSTRUCTIONS_ASYNC = instructions_async
@@ -162,34 +188,40 @@ export default class Processor<T, U extends object = object> {
 	 * Process this component’s template with some data, and return the resulting fragment.
 	 * @typeparam T      the type of the data to fill
 	 * @typeparam U      the type of the `options` object
-	 * @param   data     the data to fill
+	 * @param   data     the data to fill the content when processing
 	 * @param   options  additional processing options
-	 * @param   this_arg the `this` context, if any, in which this object’s instructions is called
 	 * @returns the processed output
 	 */
-	process(data: T, options?: U, this_arg?: unknown): DocumentFragment {
+	process(data: T, options?: U): DocumentFragment {
 		if (this._INSTRUCTIONS_ASYNC !== null) {
 			console.info('An asynchronous instruction is available; did you mean to call `processAsync()`?')
 		}
-		const frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
-		return Processor.process(frag, this._INSTRUCTIONS, data, options, this_arg)
+		return Processor.process(
+			this._TEMPLATE.content.cloneNode(true) as DocumentFragment, // NB:LINK: https://dom.spec.whatwg.org/#dom-node-clonenode
+			this._INSTRUCTIONS,
+			data,
+			options,
+		);
 	}
 	/**
 	 * Asynchronous {@link Processor#process}.
 	 * @typeparam T      the type of the data to fill
 	 * @typeparam U      the type of the `options` object
-	 * @param   data     the data to fill
+	 * @param   data     the data to fill the content when processing
 	 * @param   options  additional processing options
-	 * @param   this_arg the `this` context, if any, in which this object’s instructions is called
 	 * @returns the processed output
 	 */
-	async processAsync(data: T|Promise<T>, options?: U|Promise<U>, this_arg?: unknown): Promise<DocumentFragment> {
+	async processAsync(data: T | Promise<T>, options?: U | Promise<U>): Promise<DocumentFragment> {
 		if (this._INSTRUCTIONS_ASYNC === null) {
 			console.warn('No asynchronous instructions found. Executing synchronous instructions instead…')
-			return this.process(await data, await options, this_arg)
+			return this.process(await data, await options)
 		}
-		const frag: DocumentFragment = this._TEMPLATE.content.cloneNode(true) as DocumentFragment // NB{LINK} https://dom.spec.whatwg.org/#dom-node-clonenode
-		return Processor.processAsync(frag, this._INSTRUCTIONS_ASYNC, data, options, this_arg)
+		return Processor.processAsync(
+			this._TEMPLATE.content.cloneNode(true) as DocumentFragment, // NB:LINK: https://dom.spec.whatwg.org/#dom-node-clonenode
+			this._INSTRUCTIONS_ASYNC,
+			data,
+			options,
+		);
 	}
 }
 
